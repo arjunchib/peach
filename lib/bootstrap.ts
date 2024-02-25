@@ -40,6 +40,7 @@ export async function bootstrap(config: AppConfig) {
   await gatewayService.init(
     config,
     inject(DiscordRestService),
-    inject(RouterService)
+    inject(RouterService),
+    storeService
   );
 }
