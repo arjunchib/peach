@@ -5,10 +5,12 @@ import type { UserCommand } from "../commands/user_command";
 import { inject } from "../injector";
 import type { ApplicationCommand } from "../interfaces/application_command";
 import { DiscordRestService } from "./discord_rest_service";
+import { StoreService } from "./store_service";
 
 export class CommandService {
   private config = inject(APP_CONFIG);
   private discordRestService = inject(DiscordRestService);
+  private storeService = inject(StoreService);
 
   async sync() {
     if (this.config.syncCommands?.global) {
@@ -20,15 +22,22 @@ export class CommandService {
   }
 
   private async syncGlobal() {
-    const remoteCommands =
-      await this.discordRestService.getGlobalApplicationCommands();
     const localCommands = [
       ...Object.values(this.config.commands.slash),
       ...Object.values(this.config.commands.user),
       ...Object.values(this.config.commands.message),
     ];
-    remoteCommands.sort(this.compareCommands);
     localCommands.sort(this.compareCommands);
+    const hash = Bun.hash.cityHash32(JSON.stringify(localCommands));
+    if (this.storeService.store.globalCommandsHash === hash) {
+      return;
+    } else {
+      this.storeService.store.globalCommandsHash = hash;
+      await this.storeService.save();
+    }
+    const remoteCommands =
+      await this.discordRestService.getGlobalApplicationCommands();
+    remoteCommands.sort(this.compareCommands);
     if (this.commandsMatch(localCommands, remoteCommands)) {
       const commands = localCommands.map((command) =>
         command.toApplicationCommand()
@@ -42,15 +51,22 @@ export class CommandService {
   private async syncGuild(id: string) {
     const guildId = this.config.syncCommands?.guildId;
     if (!guildId) throw new Error("No guild id!");
-    const remoteCommands =
-      await this.discordRestService.getGuildApplicationCommands(guildId);
     const localCommands = [
       ...Object.values(this.config.commands.slash),
       ...Object.values(this.config.commands.user),
       ...Object.values(this.config.commands.message),
     ];
-    remoteCommands.sort(this.compareCommands);
     localCommands.sort(this.compareCommands);
+    const hash = Bun.hash.cityHash32(JSON.stringify(localCommands));
+    if (this.storeService.store.guildCommandsHash === hash) {
+      return;
+    } else {
+      this.storeService.store.guildCommandsHash = hash;
+      await this.storeService.save();
+    }
+    const remoteCommands =
+      await this.discordRestService.getGuildApplicationCommands(guildId);
+    remoteCommands.sort(this.compareCommands);
     if (!this.commandsMatch(localCommands, remoteCommands)) {
       const commands = localCommands.map((command) =>
         command.toApplicationCommand()

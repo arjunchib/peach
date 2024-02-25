@@ -5,6 +5,7 @@ import { CommandService } from "./services/command_service";
 import { DiscordRestService } from "./services/discord_rest_service";
 import { GatewayService } from "./services/gateway_service";
 import { RouterService } from "./services/router_service";
+import { StoreService } from "./services/store_service";
 
 declare global {
   var cachedGatewayService: GatewayService | undefined;
@@ -27,6 +28,8 @@ export const APP_CONFIG = new InjectionToken<AppConfig>();
 
 export async function bootstrap(config: AppConfig) {
   inject(APP_CONFIG, config);
+  const storeService = inject(StoreService);
+  await storeService.init();
   const commandService = inject(CommandService);
   await commandService.sync();
   const gatewayService = inject(
