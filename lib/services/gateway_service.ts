@@ -135,6 +135,8 @@ export class GatewayService {
     if (this.config.debug) console.log("Closed with", event.code);
     if (!event.code || RESUMABLE_CLOSE_CODES.includes(event.code)) {
       this.resume();
+    } else {
+      clearInterval(this.heartbeatTimer);
     }
   }
 
