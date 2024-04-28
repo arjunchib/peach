@@ -6,7 +6,11 @@ export class HttpClient {
 
   constructor(private baseUrl: string) {}
 
-  private async request(method: string, url: string, body?: any) {
+  private async request<T>(
+    method: string,
+    url: string,
+    body?: any
+  ): Promise<T> {
     if (this.config.debug) {
       console.log(`${method} ${url}`);
       if (body) console.log(body);
@@ -19,7 +23,7 @@ export class HttpClient {
       },
       body: JSON.stringify(body),
     });
-    const resBody = await res.json();
+    const resBody = (await res.json()) as any;
     if (res.status >= 400 && res.status < 600) {
       if (this.config.debug)
         console.log(JSON.stringify(resBody["errors"], null, 2));
@@ -33,8 +37,8 @@ export class HttpClient {
     }
   }
 
-  async get(url: string) {
-    return await this.request("GET", url);
+  async get<T>(url: string) {
+    return await this.request<T>("GET", url);
   }
 
   async head(url: string) {

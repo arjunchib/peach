@@ -7,7 +7,9 @@ import type {
   HelloEvent,
   IdentifyEvent,
   InvalidSessionEvent,
+  ReadyEvent,
   ResumeEvent,
+  VoiceStateUpdateSendEvent,
 } from "../interfaces/gateway_events";
 import { DiscordRestService } from "./discord_rest_service";
 import { RouterService } from "./router_service";
@@ -21,6 +23,8 @@ export class GatewayService {
   private routerService = inject(RouterService);
   private storeService = inject(StoreService);
 
+  public readyEventPayload?: ReadyEvent["d"];
+
   private gatewayUrl?: string;
   private ws?: WebSocket;
   private heartbeatTimer?: Timer;
@@ -31,6 +35,10 @@ export class GatewayService {
   private heartbeatIntervalMs?: number;
   private resumeOnOpen?: boolean;
   private skipIdentify?: boolean;
+  private eventListeners = new Map<
+    string,
+    (event: DispatchEvent) => Promise<void> | void
+  >();
 
   async init(
     config: AppConfig,
@@ -57,6 +65,20 @@ export class GatewayService {
       if (this.config.debug) console.log("Connecting to new gateway");
       await this.connect();
     }
+  }
+
+  sendVoiceStateUpdate(payload: VoiceStateUpdateSendEvent["d"]) {
+    this.send<VoiceStateUpdateSendEvent>({
+      op: 4,
+      d: payload,
+    });
+  }
+
+  on<T extends DispatchEvent>(
+    event: T["t"],
+    fn: (event: T) => Promise<void> | void
+  ) {
+    this.eventListeners.set(event, fn as any);
   }
 
   private async connect() {
@@ -131,7 +153,8 @@ export class GatewayService {
     }
   }
 
-  private handleClose(event: CloseEvent) {
+  private handleClose(e: any) {
+    const event = e as CloseEvent; // some issue with bun types
     if (this.config.debug) console.log("Closed with", event.code);
     if (!event.code || RESUMABLE_CLOSE_CODES.includes(event.code)) {
       this.resume();
@@ -140,7 +163,8 @@ export class GatewayService {
     }
   }
 
-  private async handleMessage(event: MessageEvent) {
+  private async handleMessage(e: any) {
+    const event = e as MessageEvent; // some issue with bun types
     const payload: GatewayEvent = JSON.parse(event.data);
     this.sequenceNumber = payload.s ?? null;
     this.storeService.store.sequenceNumber = this.sequenceNumber;
@@ -165,7 +189,12 @@ export class GatewayService {
   }
 
   private async handleDispatch(event: DispatchEvent) {
+    const fn = this.eventListeners.get(event.t);
+    if (fn) {
+      await fn(event);
+    }
     if (event.t === "READY") {
+      this.readyEventPayload = event.d;
       this.sessionId = event.d.session_id;
       this.resumeGatewayUrl = event.d.resume_gateway_url;
       this.storeService.store.sessionId = this.sessionId;

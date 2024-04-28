@@ -10,7 +10,7 @@ export class DiscordRestService {
 
   async getGateway(): Promise<{ url: string }> {
     const res = await fetch("https://discord.com/api/gateway");
-    return await res.json();
+    return (await res.json()) as { url: string };
   }
 
   async getGlobalApplicationCommands(): Promise<ApplicationCommand[]> {

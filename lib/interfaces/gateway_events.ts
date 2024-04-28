@@ -1,4 +1,6 @@
 import type { DiscordInteraction } from "./interaction";
+import type { User } from "./user";
+import type { VoiceState } from "./voice";
 
 interface BaseGatewayEvent {
   s?: number;
@@ -35,6 +37,16 @@ export interface IdentifyEvent extends BaseGatewayEvent {
   };
 }
 
+export interface VoiceStateUpdateSendEvent extends BaseGatewayEvent {
+  op: 4;
+  d: {
+    guild_id: string;
+    channel_id: string;
+    self_mute: boolean;
+    self_deaf: boolean;
+  };
+}
+
 export interface ResumeEvent extends BaseGatewayEvent {
   op: 6;
   d: {
@@ -68,8 +80,13 @@ export interface ReadyEvent extends BaseGatewayEvent {
   op: 0;
   t: "READY";
   d: {
+    v: number;
+    user: User;
+    guilds: any[];
     session_id: string;
     resume_gateway_url: string;
+    shard?: [number, number];
+    application: any;
   };
 }
 
@@ -79,12 +96,33 @@ export interface InteractionCreateEvent extends BaseGatewayEvent {
   d: DiscordInteraction;
 }
 
-export type DispatchEvent = ReadyEvent | InteractionCreateEvent;
+export interface VoiceStateUpdateRecvEvent extends BaseGatewayEvent {
+  op: 0;
+  t: "VOICE_STATE_UPDATE";
+  d: VoiceState;
+}
+
+export interface VoiceServerUpdateEvent extends BaseGatewayEvent {
+  op: 0;
+  t: "VOICE_SERVER_UPDATE";
+  d: {
+    token: string;
+    guild_id: string;
+    endpoint: string;
+  };
+}
+
+export type DispatchEvent =
+  | ReadyEvent
+  | InteractionCreateEvent
+  | VoiceStateUpdateRecvEvent
+  | VoiceServerUpdateEvent;
 
 export type GatewayEvent =
   | DispatchEvent
   | HeartbeatEvent
   | IdentifyEvent
+  | VoiceStateUpdateSendEvent
   | ResumeEvent
   | ReconnectEvent
   | InvalidSessionEvent
