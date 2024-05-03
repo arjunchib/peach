@@ -17,10 +17,10 @@ import type {
   VoiceSpeakingEvent,
   EncryptionMode,
 } from "../interfaces/voice";
-import { GatewayService } from "./gateway_service";
+import { GatewayService } from "../services/gateway_service";
 import { logger } from "../logger";
 import { secretbox, randomBytes } from "tweetnacl";
-import { WebmOpusDemuxer } from "../audio/webm-opus-demuxer";
+import { WebmOpusDemuxer } from "./webm-opus-demuxer";
 
 const CHANNELS = 2;
 const TIMESTAMP_INC = (48_000 / 100) * CHANNELS;
