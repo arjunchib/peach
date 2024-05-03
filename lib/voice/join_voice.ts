@@ -1,14 +1,8 @@
-import { inject } from "../injector";
 import type { VoiceStateUpdateSendEvent } from "../interfaces/gateway_events";
-import { VoiceGatewayService } from "./voice_gateway_service";
+import { VoiceConnection } from "./voice_connection";
 
 export function joinVoice(options: VoiceStateUpdateSendEvent["d"]) {
-  const voiceGatewayService = inject(VoiceGatewayService);
-
-  return new Promise<VoiceGatewayService>((resolve) => {
-    voiceGatewayService.eventTarget.addEventListener("ready", () =>
-      resolve(voiceGatewayService)
-    );
-    voiceGatewayService.init(options);
+  return new Promise<VoiceConnection>((resolve) => {
+    return new VoiceConnection(options, (voiceConn) => resolve(voiceConn));
   });
 }

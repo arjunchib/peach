@@ -1,4 +1,4 @@
-import type { udp } from "bun";
+import type { BunFile, udp } from "bun";
 import { APP_CONFIG } from "../bootstrap";
 import { inject } from "../injector";
 import type {
@@ -30,11 +30,8 @@ function randomNBit(numberOfBits: number) {
   return Math.floor(Math.random() * 2 ** numberOfBits);
 }
 
-export class VoiceGatewayService {
-  private config = inject(APP_CONFIG);
+export class VoiceConnection {
   private gatewayService = inject(GatewayService);
-
-  eventTarget = new EventTarget();
 
   private sessionId?: string;
   private token?: string;
@@ -55,8 +52,12 @@ export class VoiceGatewayService {
   private timestamp = randomNBit(32);
   private nonce = 0;
   private audioTimer?: Timer;
+  private cb?: (voiceConn: VoiceConnection) => void;
 
-  init(options: VoiceStateUpdateSendEvent["d"]) {
+  constructor(
+    options: VoiceStateUpdateSendEvent["d"],
+    cb?: (voiceConn: VoiceConnection) => void
+  ) {
     this.gatewayService.sendVoiceStateUpdate(options);
     this.gatewayService.on(
       "VOICE_STATE_UPDATE",
@@ -66,26 +67,57 @@ export class VoiceGatewayService {
       "VOICE_SERVER_UPDATE",
       this.onVoiceServerUpdate.bind(this)
     );
+    this.cb = cb;
   }
 
-  sendAudio(data: ReadableStream) {
+  playAudio(data: BunFile | ReadableStream) {
+    return new Promise<void>((resolve) => {
+      if (!(data instanceof ReadableStream)) {
+        data = data.stream();
+      }
+      this.setSpeaking(1);
+      const rs = data.pipeThrough(new WebmOpusDemuxer());
+      const reader = rs.getReader();
+      let silenceCount = 0;
+      this.audioTimer = setInterval(async () => {
+        const chunk = await reader.read();
+        if (chunk.done) {
+          if (silenceCount++ < 5) {
+            this.sendAudioPacket(
+              new Uint8Array(new Uint32Array([0xf8, 0xff, 0xfe]))
+            );
+          } else {
+            clearInterval(this.audioTimer);
+            reader.releaseLock();
+            this.setSpeaking(0);
+            resolve();
+          }
+        } else {
+          this.sendAudioPacket(chunk.value);
+        }
+      }, 15);
+    });
+  }
+
+  disconnect() {
+    this.gatewayService.sendVoiceStateUpdate({
+      guild_id: this.guildId!,
+      channel_id: null,
+      self_deaf: false,
+      self_mute: false,
+    });
+    this.udp?.close();
+    this.ws?.close();
+    clearInterval(this.audioTimer);
+    clearInterval(this.heartbeatTimer);
+  }
+
+  private setSpeaking(speaking: number) {
     if (!this.ssrc) throw new Error("no ssrc");
     this.send<VoiceSpeakingEvent>({
       op: 5,
-      d: { speaking: 1, delay: 0, ssrc: this.ssrc },
+      d: { speaking, delay: 0, ssrc: this.ssrc },
     });
-    const rs = data.pipeThrough(new WebmOpusDemuxer());
-    const reader = rs.getReader();
-    this.audioTimer = setInterval(async () => {
-      const chunk = await reader.read();
-      if (chunk.done) {
-        clearInterval(this.audioTimer);
-        reader.releaseLock();
-        return;
-      }
-      this.sendAudioPacket(chunk.value);
-      // console.log(`[audio] Sent packet ${this.state.destAddr?.hostname}`);
-    }, 15);
   }
 
   private sendAudioPacket(opusPacket: Uint8Array) {
@@ -229,8 +261,9 @@ export class VoiceGatewayService {
         data: (socket, buf, port, addr) => {
           if (this.udpMode === "discovery") {
             this.myIp = buf.toString("ascii", 8, 72);
-            logger.voice("UDP receive", this.myIp);
+            logger.voice("My IP is", this.myIp);
             this.selectProtocol();
+            this.udpMode = "voice";
           }
         },
         error(socket, error) {
@@ -247,7 +280,7 @@ export class VoiceGatewayService {
   private handleSessionDescription(event: VoiceSessionDescriptionEvent) {
     this.encryptionMode = event.d.mode;
     this.secretKey = new Uint8Array(event.d.secret_key);
-    this.eventTarget.dispatchEvent(new Event("ready"));
+    this.cb?.(this);
   }
 
   private heartbeat() {
@@ -264,7 +297,6 @@ export class VoiceGatewayService {
   }
 
   private discoverIpAddress() {
-    logger.voice("Discovering IP address");
     this.udpMode = "discovery";
     const buffer = new ArrayBuffer(74);
     const view = new DataView(buffer);

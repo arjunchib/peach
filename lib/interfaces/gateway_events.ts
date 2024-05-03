@@ -41,7 +41,7 @@ export interface VoiceStateUpdateSendEvent extends BaseGatewayEvent {
   op: 4;
   d: {
     guild_id: string;
-    channel_id: string;
+    channel_id: string | null;
     self_mute: boolean;
     self_deaf: boolean;
   };
