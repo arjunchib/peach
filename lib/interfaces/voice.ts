@@ -14,6 +14,11 @@ export interface VoiceState {
   request_to_speak_timestamp: string;
 }
 
+export type EncryptionMode =
+  | "xsalsa20_poly1305"
+  | "xsalsa20_poly1305_suffix"
+  | "xsalsa20_poly1305_lite";
+
 export interface VoiceIdentifyEvent {
   op: 0;
   d: {
@@ -24,23 +29,48 @@ export interface VoiceIdentifyEvent {
   };
 }
 
+export interface VoiceSelectProtocolEvent {
+  op: 1;
+  d: {
+    protocol: "udp";
+    data: {
+      address: string;
+      port: number;
+      mode: EncryptionMode;
+    };
+  };
+}
+
 export interface VoiceReadyEvent {
   op: 2;
   d: {
     ssrc: number;
     ip: string;
     port: number;
-    modes: (
-      | "xsalsa20_poly1305"
-      | "xsalsa20_poly1305_suffix"
-      | "xsalsa20_poly1305_lite"
-    )[];
+    modes: EncryptionMode[];
   };
 }
 
 export interface VoiceHeartbeatEvent {
   op: 3;
   d: number;
+}
+
+export interface VoiceSessionDescriptionEvent {
+  op: 4;
+  d: {
+    mode: EncryptionMode;
+    secret_key: number[];
+  };
+}
+
+export interface VoiceSpeakingEvent {
+  op: 5;
+  d: {
+    speaking: number;
+    delay: number;
+    ssrc: number;
+  };
 }
 
 export interface VoiceHeartbeatAckEvent {
@@ -57,7 +87,10 @@ export interface VoiceHelloEvent {
 
 export type VoiceGatewayEvent =
   | VoiceIdentifyEvent
+  | VoiceSelectProtocolEvent
   | VoiceReadyEvent
   | VoiceHeartbeatEvent
+  | VoiceSessionDescriptionEvent
+  | VoiceSpeakingEvent
   | VoiceHeartbeatAckEvent
   | VoiceHelloEvent;

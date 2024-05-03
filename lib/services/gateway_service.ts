@@ -11,6 +11,7 @@ import type {
   ResumeEvent,
   VoiceStateUpdateSendEvent,
 } from "../interfaces/gateway_events";
+import { logger } from "../logger";
 import { DiscordRestService } from "./discord_rest_service";
 import { RouterService } from "./router_service";
 import { StoreService } from "./store_service";
@@ -50,19 +51,19 @@ export class GatewayService {
       this.storeService.store;
     // check if we hot reloaded by seeing if a websocket connection exists
     if (this.ws) {
-      if (this.config.debug) console.log("Reusing gateway");
+      logger.gateway("Reusing gateway");
       this.config = config;
       this.discordRestService = discordRestService;
       this.routerService = routerService;
       this.storeService = storeService;
     } else if (resumeGatewayUrl && sessionId && sequenceNumber) {
-      if (this.config.debug) console.log("Resuming gateway");
+      logger.gateway("Resuming gateway");
       this.resumeGatewayUrl = resumeGatewayUrl;
       this.sessionId = sessionId;
       this.sequenceNumber = sequenceNumber;
       this.resume();
     } else {
-      if (this.config.debug) console.log("Connecting to new gateway");
+      logger.gateway("Connecting to new gateway");
       await this.connect();
     }
   }
@@ -125,12 +126,12 @@ export class GatewayService {
   }
 
   private send<T extends GatewayEvent>(event: T) {
-    if (this.config.debug) console.log("Sent\n", event);
+    logger.gateway("Websocket sent", event);
     this.ws?.send(JSON.stringify(event));
   }
 
   private handleOpen() {
-    if (this.config.debug) console.log("Open websocket");
+    logger.gateway("Open websocket");
     if (this.resumeOnOpen) {
       this.resumeOnOpen = false;
       if (!this.sessionId) {
@@ -155,7 +156,7 @@ export class GatewayService {
 
   private handleClose(e: any) {
     const event = e as CloseEvent; // some issue with bun types
-    if (this.config.debug) console.log("Closed with", event.code);
+    logger.gateway("Websocket closed", event);
     if (!event.code || RESUMABLE_CLOSE_CODES.includes(event.code)) {
       this.resume();
     } else {
@@ -169,9 +170,7 @@ export class GatewayService {
     this.sequenceNumber = payload.s ?? null;
     this.storeService.store.sequenceNumber = this.sequenceNumber;
     await this.storeService.save();
-    if (this.config.debug) {
-      console.log("Recv\n", payload);
-    }
+    logger.gateway("Websocket received", payload);
     switch (payload.op) {
       case 0:
         return await this.handleDispatch(payload);
@@ -244,7 +243,7 @@ export class GatewayService {
       throw new Error("No websocket!");
     }
     if (!this.acked) {
-      if (this.config.debug) console.log("Ack was not received");
+      logger.gateway("Ack was not received");
       this.ws.close(1002);
       clearInterval(this.heartbeatTimer);
       this.resume();

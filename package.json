@@ -7,5 +7,12 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "overrides": {
+    "bun-types": "latest"
   }
 }

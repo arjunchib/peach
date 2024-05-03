@@ -24,7 +24,7 @@ export interface AppConfig {
   debug?: boolean;
 }
 
-export const APP_CONFIG = new InjectionToken<AppConfig>();
+export const APP_CONFIG = new InjectionToken<AppConfig>("APP_CONFIG");
 
 export async function bootstrap(config: AppConfig) {
   inject(APP_CONFIG, config);

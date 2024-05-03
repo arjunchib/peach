@@ -1,5 +1,9 @@
+import { logger } from "./logger";
+
 // @ts-ignore
-export class InjectionToken<T = any> {}
+export class InjectionToken<T = any> {
+  constructor(public name?: string) {}
+}
 
 export type Token<T = any> = (new () => T) | InjectionToken<T>;
 
@@ -11,10 +15,10 @@ export function inject<T>(token: new () => T, initialValue?: T): T;
 export function inject<T>(token: InjectionToken<T>, initialValue?: T): T;
 export function inject<T>(token: Token, initialValue?: T): T {
   if (rootProvider.dependencies.has(token)) {
-    console.log("Found dependency", token);
+    logger.injector("Found dependency", token.name);
     return rootProvider.dependencies.get(token);
   } else {
-    console.log("Creating dependency", token);
+    logger.injector(`Creating dependency`, token.name);
     const dependency = initialValue
       ? initialValue
       : token instanceof InjectionToken

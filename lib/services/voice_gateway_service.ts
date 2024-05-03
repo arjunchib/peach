@@ -12,20 +12,49 @@ import type {
   VoiceHelloEvent,
   VoiceHeartbeatEvent,
   VoiceReadyEvent,
+  VoiceSelectProtocolEvent,
+  VoiceSessionDescriptionEvent,
+  VoiceSpeakingEvent,
+  EncryptionMode,
 } from "../interfaces/voice";
 import { GatewayService } from "./gateway_service";
+import { logger } from "../logger";
+import { secretbox, randomBytes } from "tweetnacl";
+import { WebmOpusDemuxer } from "../audio/webm-opus-demuxer";
+
+const CHANNELS = 2;
+const TIMESTAMP_INC = (48_000 / 100) * CHANNELS;
+const MAX_NONCE_SIZE = 2 ** 32 - 1;
+
+function randomNBit(numberOfBits: number) {
+  return Math.floor(Math.random() * 2 ** numberOfBits);
+}
 
 export class VoiceGatewayService {
   private config = inject(APP_CONFIG);
   private gatewayService = inject(GatewayService);
 
-  private session_id?: string;
+  eventTarget = new EventTarget();
+
+  private sessionId?: string;
   private token?: string;
-  private guild_id?: string;
+  private guildId?: string;
   private endpoint?: string;
   private ws?: WebSocket;
   private udp?: udp.Socket<"buffer">;
   private heartbeatTimer?: Timer;
+  private ssrc?: number;
+  private udpMode?: "discovery" | "voice";
+  private myIp?: string;
+  private destIp?: string;
+  private port?: number;
+  private availableModes?: EncryptionMode[];
+  private encryptionMode?: EncryptionMode;
+  private secretKey?: Uint8Array;
+  private sequence = randomNBit(16);
+  private timestamp = randomNBit(32);
+  private nonce = 0;
+  private audioTimer?: Timer;
 
   init(options: VoiceStateUpdateSendEvent["d"]) {
     this.gatewayService.sendVoiceStateUpdate(options);
@@ -39,28 +68,106 @@ export class VoiceGatewayService {
     );
   }
 
+  sendAudio(data: ReadableStream) {
+    if (!this.ssrc) throw new Error("no ssrc");
+    this.send<VoiceSpeakingEvent>({
+      op: 5,
+      d: { speaking: 1, delay: 0, ssrc: this.ssrc },
+    });
+    const rs = data.pipeThrough(new WebmOpusDemuxer());
+    const reader = rs.getReader();
+    this.audioTimer = setInterval(async () => {
+      const chunk = await reader.read();
+      if (chunk.done) {
+        clearInterval(this.audioTimer);
+        reader.releaseLock();
+        return;
+      }
+      this.sendAudioPacket(chunk.value);
+      // console.log(`[audio] Sent packet ${this.state.destAddr?.hostname}`);
+    }, 15);
+  }
+
+  private sendAudioPacket(opusPacket: Uint8Array) {
+    const packet = this.createAudioPacket(opusPacket);
+    this.udp?.send(packet, this.port!, this.destIp!);
+  }
+
+  private createAudioPacket(opusPacket: Uint8Array) {
+    const header = new Uint8Array(12);
+    const headerView = new DataView(header.buffer);
+    headerView.setUint8(0, 0x80);
+    headerView.setUint8(1, 0x78);
+    headerView.setUint16(2, this.sequence!);
+    headerView.setUint32(4, this.timestamp!);
+    headerView.setUint32(8, this.ssrc!);
+
+    this.sequence!++;
+    this.timestamp! += TIMESTAMP_INC;
+    if (this.sequence! >= 2 ** 16) this.sequence = 0;
+    if (this.timestamp! >= 2 ** 32) this.timestamp = 0;
+
+    return Uint8Array.from([
+      ...header,
+      ...this.encryptOpusPacket(opusPacket, header),
+    ]);
+  }
+
+  private encryptOpusPacket(opusPacket: Uint8Array, rtpHeader?: Uint8Array) {
+    if (!this.secretKey) {
+      throw new Error("No secret key");
+    }
+    if (this.encryptionMode === "xsalsa20_poly1305_lite") {
+      this.nonce++;
+      if (this.nonce > MAX_NONCE_SIZE) this.nonce = 0;
+      const nonceBuffer = new Uint8Array(24);
+      const nonceView = new DataView(nonceBuffer.buffer);
+      nonceView.setUint32(0, this.nonce);
+      return new Uint8Array([
+        ...secretbox(opusPacket, nonceBuffer, this.secretKey),
+        ...nonceBuffer.slice(0, 4),
+      ]);
+    } else if (this.encryptionMode === "xsalsa20_poly1305_suffix") {
+      const random = randomBytes(24);
+      return new Uint8Array([
+        ...secretbox(opusPacket, random, this.secretKey),
+        ...random,
+      ]);
+    }
+
+    if (!rtpHeader) {
+      throw new Error("No RTP header");
+    }
+
+    return secretbox(
+      opusPacket,
+      new Uint8Array([...rtpHeader, ...new Uint8Array(12)]),
+      this.secretKey
+    );
+  }
+
   private send<T extends VoiceGatewayEvent>(event: T) {
-    if (this.config.debug) console.log("Sent\n", event);
+    logger.voice("Websocket sent", event);
     this.ws?.send(JSON.stringify(event));
   }
 
   private onVoiceStateUpdate(event: VoiceStateUpdateRecvEvent) {
-    this.session_id = event.d.session_id;
+    this.sessionId = event.d.session_id;
     this.connect();
   }
 
   private onVoiceServerUpdate(event: VoiceServerUpdateEvent) {
     this.token = event.d.token;
-    this.guild_id = event.d.guild_id;
+    this.guildId = event.d.guild_id;
     this.endpoint = event.d.endpoint;
     this.connect();
   }
 
   private connect() {
     if (
-      this.session_id &&
+      this.sessionId &&
       this.token &&
-      this.guild_id &&
+      this.guildId &&
       this.endpoint &&
       this.gatewayService.readyEventPayload
     ) {
@@ -71,29 +178,34 @@ export class VoiceGatewayService {
       this.ws.addEventListener("error", (event) => {
         console.error(event);
       });
-      this.send<VoiceIdentifyEvent>({
-        op: 0,
-        d: {
-          server_id: this.guild_id,
-          user_id: this.gatewayService.readyEventPayload.user.id,
-          session_id: this.session_id,
-          token: this.token,
-        },
-      });
     }
   }
 
   private async handleMessage(message: MessageEvent) {
     const event: VoiceGatewayEvent = JSON.parse(message.data);
+    logger.voice("Websocket receive", event);
     switch (event.op) {
       case 2: // ready
         return await this.handleReady(event);
+      case 4: //session description
+        return this.handleSessionDescription(event);
       case 8: // hello
         return this.handleHello(event);
     }
   }
 
-  private handleOpen() {}
+  private handleOpen() {
+    // these values have already been checked
+    this.send<VoiceIdentifyEvent>({
+      op: 0,
+      d: {
+        server_id: this.guildId!,
+        user_id: this.gatewayService.readyEventPayload!.user.id,
+        session_id: this.sessionId!,
+        token: this.token!,
+      },
+    });
+  }
 
   private handleClose() {
     clearInterval(this.heartbeatTimer);
@@ -108,37 +220,84 @@ export class VoiceGatewayService {
   }
 
   private async handleReady(event: VoiceReadyEvent) {
+    this.ssrc = event.d.ssrc;
+    this.destIp = event.d.ip;
+    this.port = event.d.port;
+    this.availableModes = event.d.modes;
     this.udp = await Bun.udpSocket({
       socket: {
-        data(socket, buf, port, addr) {
-          console.log(buf.toString("ascii", 8, 72));
+        data: (socket, buf, port, addr) => {
+          if (this.udpMode === "discovery") {
+            this.myIp = buf.toString("ascii", 8, 72);
+            logger.voice("UDP receive", this.myIp);
+            this.selectProtocol();
+          }
         },
         error(socket, error) {
           console.error(error);
         },
         drain(socket) {
-          console.log("Draining socket");
+          logger.voice("UDP drain");
         },
       },
     });
-    this.discoverIpAddress(event.d);
+    this.discoverIpAddress();
+  }
+
+  private handleSessionDescription(event: VoiceSessionDescriptionEvent) {
+    this.encryptionMode = event.d.mode;
+    this.secretKey = new Uint8Array(event.d.secret_key);
+    this.eventTarget.dispatchEvent(new Event("ready"));
   }
 
   private heartbeat() {
     this.send<VoiceHeartbeatEvent>({
       op: 3,
-      d: Math.floor(Math.random() * 13),
+      d: this.heartbeatNonce(),
     });
   }
 
-  private discoverIpAddress(readyPayload: VoiceReadyEvent["d"]) {
-    if (this.config.debug) console.log("Discovering IP address");
+  private heartbeatNonce() {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    return buf[0];
+  }
+
+  private discoverIpAddress() {
+    logger.voice("Discovering IP address");
+    this.udpMode = "discovery";
     const buffer = new ArrayBuffer(74);
     const view = new DataView(buffer);
     view.setUint16(0, 0x1, false);
     view.setUint16(2, 70, false);
-    view.setUint32(4, readyPayload.ssrc, false);
-    view.setUint16(72, readyPayload.port, false);
-    this.udp?.send(buffer, readyPayload.port, readyPayload.ip);
+    view.setUint32(4, this.ssrc!, false);
+    view.setUint16(72, this.port!, false);
+    this.udp?.send(buffer, this.port!, this.destIp!);
+  }
+
+  private selectProtocol() {
+    if (!this.myIp) throw new Error("No IP address");
+    if (!this.udp?.port) throw new Error("No UDP Port");
+    this.send<VoiceSelectProtocolEvent>({
+      op: 1,
+      d: {
+        protocol: "udp",
+        data: {
+          address: this.myIp,
+          port: this.udp.port,
+          mode: this.preferredEncryptionMode(),
+        },
+      },
+    });
+  }
+
+  private preferredEncryptionMode(): EncryptionMode {
+    if (this.availableModes?.includes("xsalsa20_poly1305_lite")) {
+      return "xsalsa20_poly1305_lite";
+    } else if (this.availableModes?.includes("xsalsa20_poly1305_suffix")) {
+      return "xsalsa20_poly1305_suffix";
+    } else {
+      throw new Error("No supported modes available!");
+    }
   }
 }

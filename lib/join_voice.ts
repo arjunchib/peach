@@ -4,5 +4,11 @@ import { VoiceGatewayService } from "./services/voice_gateway_service";
 
 export function joinVoice(options: VoiceStateUpdateSendEvent["d"]) {
   const voiceGatewayService = inject(VoiceGatewayService);
-  voiceGatewayService.init(options);
+
+  return new Promise<VoiceGatewayService>((resolve) => {
+    voiceGatewayService.eventTarget.addEventListener("ready", () =>
+      resolve(voiceGatewayService)
+    );
+    voiceGatewayService.init(options);
+  });
 }
