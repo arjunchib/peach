@@ -73,6 +73,7 @@ export class VoiceConnection {
   }
 
   playAudio(data: BunFile | ReadableStream) {
+    logger.voice("Start audio");
     return new Promise<void>((resolve) => {
       if (!(data instanceof ReadableStream)) {
         data = data.stream();
@@ -90,6 +91,7 @@ export class VoiceConnection {
               new Uint8Array(new Uint32Array([0xf8, 0xff, 0xfe]))
             );
           } else {
+            logger.voice("End audio");
             clearInterval(this.audioTimer);
             reader.releaseLock();
             this.setSpeaking(0);

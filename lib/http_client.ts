@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "./bootstrap";
 import { inject } from "./injector";
+import { logger } from "./logger";
 
 export class HttpClient {
   private config = inject(APP_CONFIG);
@@ -11,10 +12,7 @@ export class HttpClient {
     url: string,
     body?: any
   ): Promise<T> {
-    if (this.config.debug) {
-      console.log(`${method} ${url}`);
-      if (body) console.log(body);
-    }
+    logger.http(method, url, body);
     const res = await fetch(`${this.baseUrl}${url}`, {
       method,
       headers: {
@@ -25,14 +23,14 @@ export class HttpClient {
     });
     const resBody = (await res.json()) as any;
     if (res.status >= 400 && res.status < 600) {
-      if (this.config.debug)
-        console.log(JSON.stringify(resBody["errors"], null, 2));
+      logger.http(
+        resBody["code"],
+        resBody["message"],
+        JSON.stringify(resBody["errors"], null, 2)
+      );
       throw new Error(`${resBody["code"]} - ${resBody["message"]}`);
     } else {
-      if (this.config.debug) {
-        console.log(`${res.status} ${res.statusText}`);
-        if (resBody) console.log(resBody);
-      }
+      logger.http(res.status, res.statusText, resBody);
       return resBody;
     }
   }

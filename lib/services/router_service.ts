@@ -4,6 +4,7 @@ import { MessageInteraction } from "../interactions/message_interaction";
 import { SlashInteraction } from "../interactions/slash_interaction";
 import { UserInteraction } from "../interactions/user_interaction";
 import type { DiscordInteraction } from "../interfaces/interaction";
+import { logger } from "../logger";
 import { CommandRoute } from "../routes/command_route";
 
 export class RouterService {
@@ -17,12 +18,11 @@ export class RouterService {
           route.type === interaction.data?.type &&
           route.name === interaction.data.name
       );
-      if (this.config.debug && route) {
-        console.log(
-          `Routing to ${route?.controller?.name}#${route?.method.toString()}`
-        );
+      if (route) {
+        await route.execute(this.createInteraction(interaction));
+      } else {
+        logger.router("No route matching interaction");
       }
-      await route?.execute(this.createInteraction(interaction));
     }
   }
 
