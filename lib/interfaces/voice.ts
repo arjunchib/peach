@@ -78,11 +78,25 @@ export interface VoiceHeartbeatAckEvent {
   d: number;
 }
 
+export interface VoiceResumeConnectionEvent {
+  op: 7;
+  d: {
+    server_id: string;
+    session_id: string;
+    token: string;
+  };
+}
+
 export interface VoiceHelloEvent {
   op: 8;
   d: {
     heartbeat_interval: number;
   };
+}
+
+export interface VoiceResumedEvent {
+  op: 9;
+  d: null;
 }
 
 export type VoiceGatewayEvent =
@@ -93,4 +107,6 @@ export type VoiceGatewayEvent =
   | VoiceSessionDescriptionEvent
   | VoiceSpeakingEvent
   | VoiceHeartbeatAckEvent
-  | VoiceHelloEvent;
+  | VoiceResumeConnectionEvent
+  | VoiceHelloEvent
+  | VoiceResumedEvent;

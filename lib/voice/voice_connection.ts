@@ -16,6 +16,8 @@ import type {
   VoiceSessionDescriptionEvent,
   VoiceSpeakingEvent,
   EncryptionMode,
+  VoiceResumeConnectionEvent,
+  VoiceResumedEvent,
 } from "../interfaces/voice";
 import { GatewayService } from "../services/gateway_service";
 import { logger } from "../logger";
@@ -79,6 +81,7 @@ export class VoiceConnection {
       const rs = data.pipeThrough(new WebmOpusDemuxer());
       const reader = rs.getReader();
       let silenceCount = 0;
+      if (this.audioTimer) clearInterval(this.audioTimer);
       this.audioTimer = setInterval(async () => {
         const chunk = await reader.read();
         if (chunk.done) {
@@ -223,6 +226,8 @@ export class VoiceConnection {
         return this.handleSessionDescription(event);
       case 8: // hello
         return this.handleHello(event);
+      case 9: // resumed
+        return this.handleResumed(event);
     }
   }
 
@@ -239,11 +244,18 @@ export class VoiceConnection {
     });
   }
 
-  private handleClose() {
-    clearInterval(this.heartbeatTimer);
+  private handleClose(event: CloseEvent) {
+    logger.voice(`Websocket disconnected ${event.code}`);
+    if (event.code >= 4000 && event.code < 5000) {
+      clearInterval(this.heartbeatTimer);
+      logger.voice(`Voice connection closed`);
+    } else {
+      this.resumeConnection();
+    }
   }
 
   private handleHello(event: VoiceHelloEvent) {
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = setInterval(
       this.heartbeat.bind(this),
       event.d.heartbeat_interval
@@ -281,6 +293,10 @@ export class VoiceConnection {
     this.encryptionMode = event.d.mode;
     this.secretKey = new Uint8Array(event.d.secret_key);
     this.cb?.(this);
+  }
+
+  private handleResumed(event: VoiceResumedEvent) {
+    logger.voice("Websocket resumed");
   }
 
   private heartbeat() {
@@ -331,5 +347,16 @@ export class VoiceConnection {
     } else {
       throw new Error("No supported modes available!");
     }
+  }
+
+  private resumeConnection() {
+    this.send<VoiceResumeConnectionEvent>({
+      op: 7,
+      d: {
+        server_id: this.guildId!,
+        session_id: this.sessionId!,
+        token: this.token!,
+      },
+    });
   }
 }
