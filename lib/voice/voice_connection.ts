@@ -74,10 +74,11 @@ export class VoiceConnection {
 
   playAudio(data: BunFile | Response | ReadableStream) {
     logger.voice("Start audio");
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(async (resolve) => {
       if (data instanceof Response) {
-        if (!data.body) throw new Error("No body in response");
-        data = data.body;
+        // downloads whole meme upfront
+        // creates a pause before playing but guarantees smooth playback
+        data = (await data.blob()).stream();
       } else if (!(data instanceof ReadableStream)) {
         data = data.stream();
       }
@@ -103,7 +104,7 @@ export class VoiceConnection {
         } else {
           this.sendAudioPacket(chunk.value);
         }
-      }, 15);
+      }, 20);
     });
   }
 
