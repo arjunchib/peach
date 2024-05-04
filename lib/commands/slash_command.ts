@@ -1,11 +1,21 @@
 import type { ApplicationCommand } from "../interfaces/application_command";
 import type { Option } from "../options/option";
+import { AutocompleteRoute } from "../routes/autocomplete_route";
 import { Command } from "./command";
 
 export class SlashCommand<
   T extends Record<string, Option> = Record<string, Option>
 > extends Command {
   readonly type = 1;
+
+  autocomplete = {
+    routeTo: <K extends new () => any>(
+      controller: K,
+      method: keyof InstanceType<K>
+    ) => {
+      return new AutocompleteRoute(this.name, controller, method);
+    },
+  };
 
   constructor(description: string, public options: T, name?: string) {
     super(description, name);

@@ -1,6 +1,9 @@
 import type { ApplicationCommandOption } from "../interfaces/application_command";
 
-export abstract class Option<T extends boolean = boolean> {
+export abstract class Option<
+  R extends boolean = boolean,
+  A extends boolean = boolean
+> {
   name = "_temp_name";
   abstract readonly type: 3;
   abstract readonly jsType: string | number | boolean;

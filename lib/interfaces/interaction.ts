@@ -37,7 +37,7 @@ export interface ApplicationCommandDataOption {
 
 export interface InteractionResponse {
   type: 1 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  data?: MessageInteractionResponseData;
+  data?: MessageInteractionResponseData | AutocompleteInteractionResponseData;
 }
 
 export interface MessageInteractionResponseData {
@@ -48,4 +48,17 @@ export interface MessageInteractionResponseData {
   flags?: number;
   components?: any[];
   attachments?: any[];
+}
+
+export interface AutocompleteInteractionResponseData {
+  choices: Choice[];
+}
+
+export interface Choice {
+  /** 1-100 character choice name */
+  name: string;
+  /** Localization dictionary for the name field. Values follow the same restrictions as name */
+  name_localizations?: any;
+  /** Value for the choice, up to 100 characters if string */
+  value: string | number;
 }

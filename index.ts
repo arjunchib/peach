@@ -8,4 +8,4 @@ export { customId } from "./lib/routes/matchers";
 export { createCommands } from "./lib/commands/create_commands";
 export { joinVoice } from "./lib/voice/join_voice";
 
-export type { InteractionTypes } from "./lib/commands/create_commands";
+export type { inferInteraction } from "./lib/commands/create_commands";

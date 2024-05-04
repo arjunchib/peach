@@ -1,3 +1,4 @@
+import type { AutocompleteInteraction } from "../interactions/autocomplete_interaction";
 import type { SlashInteraction } from "../interactions/slash_interaction";
 import type { MessageCommand } from "./message_command";
 import type { SlashCommand } from "./slash_command";
@@ -9,8 +10,17 @@ export interface Commands {
   message: Record<string, MessageCommand>;
 }
 
-export type InteractionTypes<T extends Commands> = {
+export type inferInteraction<T extends Commands> = {
+  slash: SlashInteractionTypes<T>;
+  autocomplete: AutocompleteInteractionTypes<T>;
+};
+
+type SlashInteractionTypes<T extends Commands> = {
   [P in keyof T["slash"]]: SlashInteraction<T["slash"][P]>;
+};
+
+type AutocompleteInteractionTypes<T extends Commands> = {
+  [P in keyof T["slash"]]: AutocompleteInteraction<T["slash"][P]>;
 };
 
 export function createCommands<T extends Commands>(commands: T): T {

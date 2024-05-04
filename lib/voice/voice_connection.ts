@@ -72,10 +72,13 @@ export class VoiceConnection {
     this.cb = cb;
   }
 
-  playAudio(data: BunFile | ReadableStream) {
+  playAudio(data: BunFile | Response | ReadableStream) {
     logger.voice("Start audio");
     return new Promise<void>((resolve) => {
-      if (!(data instanceof ReadableStream)) {
+      if (data instanceof Response) {
+        if (!data.body) throw new Error("No body in response");
+        data = data.body;
+      } else if (!(data instanceof ReadableStream)) {
         data = data.stream();
       }
       this.setSpeaking(1);

@@ -1,18 +1,21 @@
 import type { ApplicationCommandOption } from "../interfaces/application_command";
 import { Option } from "./option";
 
-export class StringOption<T extends boolean = false> extends Option<T> {
+export class StringOption<
+  R extends boolean = false,
+  A extends boolean = false
+> extends Option<R> {
   readonly type = 3;
   readonly jsType!: string;
 
   constructor(
     description: string,
     name?: string,
-    required?: T,
+    required?: R,
     public choices?: string[],
     public minLength?: number,
     public maxLength?: number,
-    public autocomplete?: boolean
+    public autocomplete?: A
   ) {
     super(description, name, required);
   }
@@ -58,18 +61,18 @@ export class StringOption<T extends boolean = false> extends Option<T> {
   }
 }
 
-export function string<T extends boolean = false>(
+export function string<R extends boolean = false, A extends boolean = false>(
   description: string,
   options?: {
     name?: string;
-    required?: T;
+    required?: R;
     choices?: string[];
     minLength?: number;
     maxLength?: number;
-    autocomplete?: boolean;
+    autocomplete?: A;
   }
 ) {
-  return new StringOption<T>(
+  return new StringOption<R, A>(
     description,
     options?.name,
     options?.required,
