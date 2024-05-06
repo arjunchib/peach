@@ -2,21 +2,20 @@ import type { ApplicationCommandOption } from "../interfaces/application_command
 import type { Choice } from "../interfaces/interaction";
 import { Option } from "./option";
 
-export class StringOption<
+export class NumberOption<
   R extends boolean = false,
-  A extends boolean = false,
-  C extends string = string
+  A extends boolean = false
 > extends Option<R, A> {
-  readonly type = 3;
-  readonly jsType!: C;
+  readonly type = 4;
+  readonly jsType!: number;
 
   constructor(
     description: string,
     name?: string,
     required?: R,
-    public choices?: Choice<C>[],
-    public minLength?: number,
-    public maxLength?: number,
+    public choices?: Choice<number>[],
+    public minValue?: number,
+    public maxValue?: number,
     public autocomplete?: A
   ) {
     super(description, name, required);
@@ -28,8 +27,8 @@ export class StringOption<
       this.description === option.description &&
       this.name === option.name &&
       this.required === option.required &&
-      this.minLength === option.min_length &&
-      this.maxLength === option.max_length &&
+      this.minValue === option.min_value &&
+      this.minValue === option.max_value &&
       this.autocomplete == option.autocomplete &&
       this.choicesEquals(option)
     );
@@ -42,8 +41,8 @@ export class StringOption<
       description: this.description,
       required: this.required,
       choices: this.choices,
-      min_length: this.minLength,
-      max_length: this.maxLength,
+      min_value: this.minValue,
+      max_value: this.maxValue,
       autocomplete: this.autocomplete,
     };
   }
@@ -64,28 +63,24 @@ export class StringOption<
   }
 }
 
-export function string<
-  R extends boolean = false,
-  A extends boolean = false,
-  C extends string = string
->(
+export function number<R extends boolean = false, A extends boolean = false>(
   description: string,
   options?: {
     name?: string;
     required?: R;
-    choices?: Choice<C>[];
-    minLength?: number;
-    maxLength?: number;
+    choices?: Choice<number>[];
+    minValue?: number;
+    maxValue?: number;
     autocomplete?: A;
   }
 ) {
-  return new StringOption<R, A, C>(
+  return new NumberOption<R, A>(
     description,
     options?.name,
     options?.required,
     options?.choices,
-    options?.minLength,
-    options?.maxLength,
+    options?.minValue,
+    options?.maxValue,
     options?.autocomplete
   );
 }

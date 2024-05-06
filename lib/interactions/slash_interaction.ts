@@ -40,7 +40,12 @@ export class SlashInteraction<T extends SlashCommand> extends Interaction {
 
   private setOptions() {
     for (const option of this.raw.data?.options ?? []) {
-      (this.options as any)[option.name] = option.value;
+      if (option.type === 6) {
+        const user = this.raw.data?.resolved?.users?.[option.value as any];
+        (this.options as any)[option.name] = user;
+      } else {
+        (this.options as any)[option.name] = option.value;
+      }
     }
   }
 }

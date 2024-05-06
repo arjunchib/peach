@@ -2,13 +2,13 @@ import type { ApplicationCommandOption } from "../interfaces/application_command
 
 export abstract class Option<
   R extends boolean = boolean,
-  A extends boolean = boolean
+  A extends boolean = false
 > {
   name = "_temp_name";
-  abstract readonly type: 3;
-  abstract readonly jsType: string | number | boolean;
+  abstract readonly type: number;
+  abstract readonly jsType: any;
 
-  constructor(public description: string, name?: string, public required?: T) {
+  constructor(public description: string, name?: string, public required?: R) {
     if (name) this.name = name;
   }
 

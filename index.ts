@@ -1,3 +1,5 @@
+export { number } from "./lib/options/number_option";
+export { user } from "./lib/options/user_option";
 export { bootstrap } from "./lib/bootstrap";
 export { slashCommand } from "./lib/commands/slash_command";
 export { userCommand } from "./lib/commands/user_command";
@@ -9,3 +11,4 @@ export { createCommands } from "./lib/commands/create_commands";
 export { joinVoice } from "./lib/voice/join_voice";
 
 export type { inferInteraction } from "./lib/commands/create_commands";
+export type { User } from "./lib/interfaces/user";

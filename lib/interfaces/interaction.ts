@@ -1,3 +1,5 @@
+import type { User } from "./user";
+
 export interface DiscordInteraction {
   id: string;
   application_id: string;
@@ -21,10 +23,19 @@ export interface ApplicationCommandData {
   id: string;
   name: string;
   type: 1 | 2 | 3;
-  resolved?: any;
+  resolved?: ApplicationCommandDataResolved;
   options?: ApplicationCommandDataOption[];
   guild_id?: string;
   target_id?: string;
+}
+
+export interface ApplicationCommandDataResolved {
+  users?: Record<string, User>;
+  members?: Record<string, any>;
+  roles?: Record<string, any>;
+  channels?: Record<string, any>;
+  messages?: Record<string, any>;
+  attachments?: Record<string, any>;
 }
 
 export interface ApplicationCommandDataOption {
@@ -54,11 +65,11 @@ export interface AutocompleteInteractionResponseData {
   choices: Choice[];
 }
 
-export interface Choice {
+export interface Choice<T extends string | number = string | number> {
   /** 1-100 character choice name */
   name: string;
   /** Localization dictionary for the name field. Values follow the same restrictions as name */
   name_localizations?: any;
   /** Value for the choice, up to 100 characters if string */
-  value: string | number;
+  value: T;
 }
