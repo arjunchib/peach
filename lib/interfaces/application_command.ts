@@ -1,3 +1,5 @@
+import type { Choice } from "./interaction";
+
 export interface ApplicationCommand {
   id: string;
   type?: 1 | 2 | 3;
@@ -22,7 +24,7 @@ export interface ApplicationCommandOption {
   description: string;
   description_localizations?: { [locale: string]: string };
   required?: boolean;
-  choices?: (string | number)[];
+  choices?: Choice[];
   options?: ApplicationCommandOption[];
   channel_types?: (0 | 1 | 2 | 3 | 4 | 5 | 10 | 11 | 12 | 13 | 14 | 15 | 16)[];
   min_value?: number;
