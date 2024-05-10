@@ -1,5 +1,8 @@
 import type { SlashCommand } from "../commands/slash_command";
-import type { DiscordInteraction } from "../interfaces/interaction";
+import type {
+  DiscordInteraction,
+  MessageInteractionResponseData,
+} from "../interfaces/interaction";
 import type { Option } from "../options/option";
 import type { StringOption } from "../options/string_option";
 import { Interaction } from "./interaction";
@@ -30,11 +33,14 @@ export class SlashInteraction<T extends SlashCommand> extends Interaction {
     this.setOptions();
   }
 
-  async respondWith(response: string) {
+  async respondWith(response: string | MessageInteractionResponseData) {
+    if (typeof response === "string") {
+      response = { content: response };
+    }
     await this.discordRestService.createInteractionResponse(
       this.raw.id,
       this.raw.token,
-      { type: 4, data: { content: response } }
+      { type: 4, data: response }
     );
   }
 

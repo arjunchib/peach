@@ -1,3 +1,4 @@
+import type { Embed } from "./embed";
 import type { User } from "./user";
 
 export interface DiscordInteraction {
@@ -54,7 +55,7 @@ export interface InteractionResponse {
 export interface MessageInteractionResponseData {
   tts?: boolean;
   content?: string;
-  embeds?: any[];
+  embeds?: Embed[];
   allowed_mentions?: any;
   flags?: number;
   components?: any[];

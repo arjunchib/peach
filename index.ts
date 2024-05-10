@@ -9,6 +9,8 @@ export { Route } from "./lib/routes/route";
 export { customId } from "./lib/routes/matchers";
 export { createCommands } from "./lib/commands/create_commands";
 export { joinVoice } from "./lib/voice/join_voice";
+export { inject } from "./lib/injector";
+export { DiscordRestService } from "./lib/services/discord_rest_service";
 
 export type { inferInteraction } from "./lib/commands/create_commands";
 export type { User } from "./lib/interfaces/user";

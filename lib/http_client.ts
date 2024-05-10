@@ -43,8 +43,8 @@ export class HttpClient {
     return await this.request("HEAD", url);
   }
 
-  async post(url: string, body?: any) {
-    return await this.request("POST", url, body);
+  async post<T>(url: string, body?: any) {
+    return await this.request<T>("POST", url, body);
   }
 
   async put(url: string, body?: any) {

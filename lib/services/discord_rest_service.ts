@@ -2,6 +2,7 @@ import { APP_CONFIG } from "../bootstrap";
 import { HttpClient } from "../http_client";
 import { inject } from "../injector";
 import type { ApplicationCommand } from "../interfaces/application_command";
+import type { GuildMember } from "../interfaces/guild_member";
 import type { InteractionResponse } from "../interfaces/interaction";
 
 export class DiscordRestService {
@@ -54,6 +55,12 @@ export class DiscordRestService {
     return await this.http.post(
       `/interactions/${interactionId}/${interactionToken}/callback`,
       response
+    );
+  }
+
+  async getGuildMember(guildId: string, userId: string) {
+    return await this.http.get<GuildMember>(
+      `/guilds/${guildId}/members/${userId}`
     );
   }
 }
