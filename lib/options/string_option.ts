@@ -3,89 +3,66 @@ import type { Choice } from "../interfaces/interaction";
 import { Option } from "./option";
 
 export class StringOption<
-  R extends boolean = false,
-  A extends boolean = false,
-  C extends string = string
-> extends Option<R, A> {
+  N extends string = string,
+  R extends boolean = boolean,
+  A extends boolean = boolean,
+  const C extends string = string
+> extends Option<N, R, A, C> {
   readonly type = 3;
   readonly jsType!: C;
 
   constructor(
+    name: N,
     description: string,
-    name?: string,
     required?: R,
-    public choices?: Choice<C>[],
+    autocomplete?: A,
+    choices?: Choice<C>[],
     public minLength?: number,
-    public maxLength?: number,
-    public autocomplete?: A
+    public maxLength?: number
   ) {
-    super(description, name, required);
+    super(name, description, required, autocomplete, choices);
   }
 
   equals(option: ApplicationCommandOption): boolean {
     return (
-      option.type === 3 &&
-      this.description === option.description &&
-      this.name === option.name &&
-      this.required === option.required &&
+      super.equals(option) &&
       this.minLength === option.min_length &&
-      this.maxLength === option.max_length &&
-      this.autocomplete == option.autocomplete &&
-      this.choicesEquals(option)
+      this.maxLength === option.max_length
     );
   }
 
   toApplicationCommandOption(): ApplicationCommandOption {
     return {
-      type: this.type,
-      name: this.name,
-      description: this.description,
-      required: this.required,
-      choices: this.choices,
+      ...super.toApplicationCommandOption(),
       min_length: this.minLength,
       max_length: this.maxLength,
-      autocomplete: this.autocomplete,
     };
-  }
-
-  private choicesEquals(option: ApplicationCommandOption): boolean {
-    const myChoices = this.choices;
-    const theirChoices = option.choices;
-    if (!myChoices && !theirChoices) return true;
-    if (!myChoices || !theirChoices) return false;
-    if (myChoices.length !== theirChoices.length) return false;
-    myChoices.sort();
-    theirChoices.sort();
-    for (let i = 0; i < myChoices.length; i++) {
-      if (myChoices[i].name !== theirChoices[i].name) return false;
-      if (myChoices[i].value !== theirChoices[i].value) return false;
-    }
-    return true;
   }
 }
 
 export function string<
-  R extends boolean = false,
-  A extends boolean = false,
-  C extends string = string
+  const N extends string = string,
+  const R extends boolean = false,
+  const A extends boolean = false,
+  const C extends string = string
 >(
+  name: N,
   description: string,
   options?: {
-    name?: string;
     required?: R;
+    autocomplete?: A;
     choices?: Choice<C>[];
     minLength?: number;
     maxLength?: number;
-    autocomplete?: A;
   }
 ) {
-  return new StringOption<R, A, C>(
+  return new StringOption<N, R, A, C>(
+    name,
     description,
-    options?.name,
     options?.required,
+    options?.autocomplete,
     options?.choices,
     options?.minLength,
-    options?.maxLength,
-    options?.autocomplete
+    options?.maxLength
   );
 }

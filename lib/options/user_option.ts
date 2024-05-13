@@ -2,12 +2,15 @@ import type { ApplicationCommandOption } from "../interfaces/application_command
 import type { User } from "../interfaces/user";
 import { Option } from "./option";
 
-export class UserOption<R extends boolean = false> extends Option<R> {
+export class UserOption<
+  N extends string = string,
+  R extends boolean = false
+> extends Option<N, R> {
   readonly type = 6;
   readonly jsType!: User;
 
-  constructor(description: string, name?: string, required?: R) {
-    super(description, name, required);
+  constructor(name: N, description: string, required?: R) {
+    super(name, description, required);
   }
 
   equals(option: ApplicationCommandOption): boolean {
@@ -29,12 +32,12 @@ export class UserOption<R extends boolean = false> extends Option<R> {
   }
 }
 
-export function user<R extends boolean = false>(
+export function user<N extends string = string, R extends boolean = false>(
+  name: N,
   description: string,
   options?: {
-    name?: string;
     required?: R;
   }
 ) {
-  return new UserOption<R>(description, options?.name, options?.required);
+  return new UserOption<N, R>(name, description, options?.required);
 }

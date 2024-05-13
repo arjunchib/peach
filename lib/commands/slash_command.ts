@@ -3,34 +3,22 @@ import type { Option } from "../options/option";
 import { AutocompleteRoute } from "../routes/autocomplete_route";
 import { Command } from "./command";
 
-export class SlashCommand<
-  T extends Record<string, Option> = Record<string, Option>
-> extends Command {
+export class SlashCommand<T extends Option = Option> extends Command {
   readonly type = 1;
 
-  autocomplete = {
-    routeTo: <K extends new () => any>(
-      controller: K,
-      method: keyof InstanceType<K>
-    ) => {
-      return new AutocompleteRoute(this.name, controller, method);
-    },
-  };
-
-  constructor(description: string, public options: T, name?: string) {
-    super(description, name);
-    this.cleanupOptions();
+  constructor(name: string, description: string, public options: T[]) {
+    super(name, description);
   }
 
-  equals(applicationCommand: ApplicationCommand) {
+  protected equals(applicationCommand: ApplicationCommand) {
     return (
       super.equals(applicationCommand) && this.optionsMatch(applicationCommand)
     );
   }
 
-  toApplicationCommand(): Partial<ApplicationCommand> {
+  protected toApplicationCommand(): Partial<ApplicationCommand> {
     const options = Object.values(this.options).map((option) =>
-      option.toApplicationCommandOption()
+      option["toApplicationCommandOption"]()
     );
     return {
       ...super.toApplicationCommand(),
@@ -43,7 +31,7 @@ export class SlashCommand<
     const theirOptions = applicationCommand.options?.toSorted(this.sortByName);
     if (!theirOptions || myOptions.length !== theirOptions.length) return false;
     for (let i = 0; i < myOptions.length; i++) {
-      if (!myOptions[i].equals(theirOptions[i])) return false;
+      if (!myOptions[i]["equals"](theirOptions[i])) return false;
     }
     return true;
   }
@@ -52,18 +40,14 @@ export class SlashCommand<
     // should check if name is undefined but we expect it always will be defined
     return a.name!.localeCompare(b.name!);
   }
-
-  private cleanupOptions() {
-    Object.entries(this.options).forEach(([name, option]) => {
-      option.name = name;
-    });
-  }
 }
 
-export function slashCommand<T extends Record<string, Option>>(value: {
-  name?: string;
-  description: string;
-  options: T;
-}) {
-  return new SlashCommand(value.description, value.options, value.name);
+export function slashCommand<T extends Option>(
+  name: string,
+  description: string,
+  options: {
+    options: T[];
+  }
+) {
+  return new SlashCommand(name, description, options.options);
 }

@@ -1,22 +1,22 @@
 import type { SlashCommand } from "../commands/slash_command";
+import type { JsType } from "../helpers";
 import type {
   DiscordInteraction,
   MessageInteractionResponseData,
 } from "../interfaces/interaction";
 import type { Option } from "../options/option";
-import type { StringOption } from "../options/string_option";
 import { Interaction } from "./interaction";
 
-type JsType<T extends Record<string, Option>> = {
-  [P in keyof T]: T[P]["jsType"];
+type RequiredOptions<T extends Option[]> = {
+  [P in T[number] as P extends Option<any, true, any, any>
+    ? P["name"]
+    : never]: JsType<P>;
 };
 
-type RequiredType<T extends Record<string, Option>> = {
-  [P in keyof T as T[P] extends Option<true> ? P : never]: T[P]["jsType"];
-};
-
-type OptionalType<T extends Record<string, Option>> = {
-  [P in keyof T as T[P] extends Option<false> ? P : never]?: T[P]["jsType"];
+type OptionalOptions<T extends Option[]> = {
+  [P in T[number] as P extends Option<any, false, any, any>
+    ? P["name"]
+    : never]?: JsType<P>;
 };
 
 // type myOption = StringOption<false, false>;
@@ -26,7 +26,9 @@ type OptionalType<T extends Record<string, Option>> = {
 // type test = IsRequired<myOption>;
 
 export class SlashInteraction<T extends SlashCommand> extends Interaction {
-  options: RequiredType<T["options"]> & OptionalType<T["options"]> = {} as any; // set below
+  options: RequiredOptions<T["options"]> & OptionalOptions<T["options"]> =
+    {} as any;
+  // options: $infer<T["options"]> = {} as any; // set below
 
   constructor(raw: DiscordInteraction) {
     super(raw);

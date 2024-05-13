@@ -1,23 +1,29 @@
 import type { SlashCommand } from "../commands/slash_command";
+import type { JsType } from "../helpers";
 import type { Choice, DiscordInteraction } from "../interfaces/interaction";
 import type { Option } from "../options/option";
 import { Interaction } from "./interaction";
 
-type AutocompleteOption<T extends Option> = {
-  value?: T["jsType"];
+type RequiredAutocompleteOption<T extends Option> = {
+  value: JsType<T>;
   focused: boolean;
 };
 
-type RequiredType<T extends Record<string, Option>> = {
-  [P in keyof T as T[P] extends Option<true, true>
-    ? P
-    : never]: AutocompleteOption<T[P]>;
+type OptionalAutocompleteOption<T extends Option> = {
+  value?: JsType<T>;
+  focused: boolean;
 };
 
-type OptionalType<T extends Record<string, Option>> = {
-  [P in keyof T as T[P] extends Option<false, true>
-    ? P
-    : never]?: AutocompleteOption<T[P]>;
+type RequiredType<T extends Option[]> = {
+  [P in T[number] as P extends Option<any, true, true>
+    ? P["name"]
+    : never]: RequiredAutocompleteOption<P>;
+};
+
+type OptionalType<T extends Option[]> = {
+  [P in T[number] as P extends Option<any, false, true>
+    ? P["name"]
+    : never]: OptionalAutocompleteOption<P>;
 };
 
 export class AutocompleteInteraction<

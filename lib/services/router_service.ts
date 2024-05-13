@@ -8,7 +8,6 @@ import type { DiscordInteraction } from "../interfaces/interaction";
 import { logger } from "../logger";
 import { AutocompleteRoute } from "../routes/autocomplete_route";
 import { CommandRoute } from "../routes/command_route";
-import type { Route } from "../routes/route";
 
 export class RouterService {
   private config = inject(APP_CONFIG);
@@ -27,14 +26,14 @@ export class RouterService {
       return this.config.routes.find(
         (route) =>
           route instanceof CommandRoute &&
-          route.type === interaction.data?.type &&
-          route.name === interaction.data.name
+          route.command.type === interaction.data?.type &&
+          route.command.name === interaction.data.name
       );
     } else if (interaction.type === 4) {
       return this.config.routes.find(
         (route) =>
           route instanceof AutocompleteRoute &&
-          route.name === interaction.data?.name
+          route.command.name === interaction.data?.name
       );
     }
   }
