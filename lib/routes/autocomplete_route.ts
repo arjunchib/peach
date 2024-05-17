@@ -2,26 +2,15 @@ import type { SlashCommand } from "../commands/slash_command";
 import type { Option } from "../options/option";
 import type { SubcommandGroupOption } from "../options/subcommand_group_option";
 import type { SubcommandOption } from "../options/subcommand_option";
+import type { OptionOption, OptionValue } from "../options/types";
 import { Route } from "./route";
 
-type IsSubcommandOrGroup<T extends Option> = T extends
-  | SubcommandGroupOption<any, any, any>
-  | SubcommandOption<any, any, any>
+type GetOption<T extends SlashCommand> = T extends SlashCommand<infer O>
+  ? O
+  : never;
+
+type GetS1<T extends Option, S1 extends string> = T extends Option<S1>
   ? T
-  : never;
-
-type GroupOption<
-  T extends Option,
-  N extends string
-> = T extends SubcommandGroupOption<N, any, any>
-  ? NonNullable<T["options"]>[number]
-  : never;
-
-type SubGroupOption<
-  T extends Option,
-  N extends string
-> = T extends SubcommandOption<N, any, any>
-  ? NonNullable<T["options"]>[number]
   : never;
 
 export class AutocompleteRoute extends Route {}
@@ -29,9 +18,15 @@ export class AutocompleteRoute extends Route {}
 export class AutocompleteRouteFrom<
   T extends SlashCommand,
   const S1 extends T extends SlashCommand<infer O>
-    ? IsSubcommandOrGroup<O>["name"]
+    ? O extends SubcommandGroupOption | SubcommandOption
+      ? O["name"]
+      : never
     : never,
-  const S2 extends GroupOption<T["options"][number], S1>["name"]
+  const S2 extends T extends SlashCommand<infer O1>
+    ? O1 extends SubcommandGroupOption<S1, any, infer O2>
+      ? O2["name"]
+      : never
+    : never
 > {
   options: any;
 
@@ -47,13 +42,10 @@ export class AutocompleteRouteFrom<
 
   focus<
     const K extends [S1] extends [never]
-      ? T["options"][number]["name"]
+      ? GetOption<T>["name"]
       : [S2] extends [never]
-      ? GroupOption<T["options"][number], S1>["options"]["name"]
-      : SubGroupOption<
-          GroupOption<T["options"][number], S1>["options"],
-          S2
-        >["options"]["name"]
+      ? keyof OptionValue<GetS1<GetOption<T>, S1>>
+      : keyof OptionValue<GetS1<OptionOption<GetS1<GetOption<T>, S1>>, S2>>
   >(...options: K[]) {
     return this;
   }
@@ -62,9 +54,15 @@ export class AutocompleteRouteFrom<
 export function autocompleteRoute<
   T extends SlashCommand,
   const S1 extends T extends SlashCommand<infer O>
-    ? IsSubcommandOrGroup<O>["name"]
+    ? O extends SubcommandGroupOption | SubcommandOption
+      ? O["name"]
+      : never
     : never,
-  const S2 extends GroupOption<T["options"][number], S1>["name"]
+  const S2 extends T extends SlashCommand<infer O1>
+    ? O1 extends SubcommandGroupOption<S1, any, infer O2>
+      ? O2["name"]
+      : never
+    : never
 >(...args: ConstructorParameters<typeof AutocompleteRouteFrom<T, S1, S2>>) {
   return new AutocompleteRouteFrom(...args);
 }

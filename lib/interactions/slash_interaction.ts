@@ -1,32 +1,13 @@
 import type { SlashCommand } from "../commands/slash_command";
-import type { JsType } from "../helpers";
 import type {
   DiscordInteraction,
   MessageInteractionResponseData,
 } from "../interfaces/interaction";
-import type { Option } from "../options/option";
+import type { InteractionOption } from "../options/types";
 import { Interaction } from "./interaction";
 
-type RequiredOptions<T extends Option[]> = {
-  [P in T[number] as P extends Option<any, true, any, any>
-    ? P["name"]
-    : never]: JsType<P>;
-};
-
-type OptionalOptions<T extends Option[]> = {
-  [P in T[number] as P extends Option<any, false, any, any>
-    ? P["name"]
-    : never]?: JsType<P>;
-};
-
-// type myOption = StringOption<false, false>;
-
-// type IsRequired<T> = [T] extends [Option<true, true>] ? true : false;
-
-// type test = IsRequired<myOption>;
-
 export class SlashInteraction<T extends SlashCommand> extends Interaction {
-  options: RequiredOptions<T["options"]> & OptionalOptions<T["options"]> =
+  options: InteractionOption<T extends SlashCommand<infer K> ? K : never> =
     {} as any;
   // options: $infer<T["options"]> = {} as any; // set below
 

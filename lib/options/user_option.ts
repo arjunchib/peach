@@ -3,41 +3,49 @@ import type { User } from "../interfaces/user";
 import { Option } from "./option";
 
 export class UserOption<
-  N extends string = string,
-  R extends boolean = false
-> extends Option<N, R> {
+  const N extends string = string,
+  const V extends User = User,
+  const R extends boolean = false,
+  const A extends boolean = false
+> extends Option<N, V, R, A> {
   readonly type = 6;
-  readonly jsType!: User;
 
-  constructor(name: N, description: string, required?: R) {
-    super(name, description, required);
+  constructor(name: N, description: string) {
+    super(name, description);
+  }
+
+  autocomplete() {
+    this._autocomplete = true as A;
+    return this as UserOption<N, V, R, true>;
+  }
+
+  required() {
+    this._required = true as R;
+    return this as UserOption<N, V, true, A>;
   }
 
   equals(option: ApplicationCommandOption): boolean {
     return (
+      super.equals(option) &&
       option.type === 3 &&
       this.description === option.description &&
-      this.name === option.name &&
-      this.required === option.required
+      this.name === option.name
     );
   }
 
   toApplicationCommandOption(): ApplicationCommandOption {
     return {
+      ...super.toApplicationCommandOption(),
       type: this.type,
       name: this.name,
       description: this.description,
-      required: this.required,
     };
   }
 }
 
-export function user<N extends string = string, R extends boolean = false>(
+export function user<const N extends string = string>(
   name: N,
-  description: string,
-  options?: {
-    required?: R;
-  }
+  description: string
 ) {
-  return new UserOption<N, R>(name, description, options?.required);
+  return new UserOption<N>(name, description);
 }

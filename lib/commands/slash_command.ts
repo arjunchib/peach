@@ -1,13 +1,18 @@
 import type { ApplicationCommand } from "../interfaces/application_command";
 import type { Option } from "../options/option";
-import { AutocompleteRoute } from "../routes/autocomplete_route";
 import { Command } from "./command";
 
-export class SlashCommand<T extends Option = Option> extends Command {
+export class SlashCommand<const T extends Option = Option> extends Command {
   readonly type = 1;
+  private _options = [] as T[];
 
-  constructor(name: string, description: string, public options: T[]) {
+  constructor(name: string, description: string) {
     super(name, description);
+  }
+
+  options<const K extends Option>(options: K[]) {
+    this._options = options as any;
+    return this as unknown as SlashCommand<K>;
   }
 
   protected equals(applicationCommand: ApplicationCommand) {
@@ -17,7 +22,7 @@ export class SlashCommand<T extends Option = Option> extends Command {
   }
 
   protected toApplicationCommand(): Partial<ApplicationCommand> {
-    const options = Object.values(this.options).map((option) =>
+    const options = Object.values(this._options!).map((option) =>
       option["toApplicationCommandOption"]()
     );
     return {
@@ -27,7 +32,7 @@ export class SlashCommand<T extends Option = Option> extends Command {
   }
 
   private optionsMatch(applicationCommand: ApplicationCommand): boolean {
-    const myOptions = Object.values(this.options).toSorted(this.sortByName);
+    const myOptions = Object.values(this._options!).toSorted(this.sortByName);
     const theirOptions = applicationCommand.options?.toSorted(this.sortByName);
     if (!theirOptions || myOptions.length !== theirOptions.length) return false;
     for (let i = 0; i < myOptions.length; i++) {
@@ -44,10 +49,7 @@ export class SlashCommand<T extends Option = Option> extends Command {
 
 export function slashCommand<T extends Option>(
   name: string,
-  description: string,
-  options: {
-    options: T[];
-  }
+  description: string
 ) {
-  return new SlashCommand(name, description, options.options);
+  return new SlashCommand(name, description);
 }
