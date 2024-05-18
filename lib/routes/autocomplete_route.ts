@@ -5,64 +5,32 @@ import type { SubcommandOption } from "../options/subcommand_option";
 import type { OptionOption, OptionValue } from "../options/types";
 import { Route } from "./route";
 
-type GetOption<T extends SlashCommand> = T extends SlashCommand<infer O>
-  ? O
-  : never;
-
-type GetS1<T extends Option, S1 extends string> = T extends Option<S1>
-  ? T
-  : never;
-
 export class AutocompleteRoute extends Route {}
 
 export class AutocompleteRouteFrom<
-  T extends SlashCommand,
-  const S1 extends T extends SlashCommand<infer O>
-    ? O extends SubcommandGroupOption | SubcommandOption
-      ? O["name"]
-      : never
-    : never,
-  const S2 extends T extends SlashCommand<infer O1>
-    ? O1 extends SubcommandGroupOption<S1, any, infer O2>
-      ? O2["name"]
-      : never
-    : never
+  T extends SlashCommand | SubcommandGroupOption | SubcommandOption
 > {
   options: any;
 
-  constructor(
-    public command: T,
-    public subcommand1?: S1,
-    public subcommand2?: S2
-  ) {}
+  constructor(public command: T) {}
 
   to<K extends new () => any>(controller: K, method: keyof InstanceType<K>) {
     return new AutocompleteRoute(controller, method);
   }
 
   focus<
-    const K extends [S1] extends [never]
-      ? GetOption<T>["name"]
-      : [S2] extends [never]
-      ? keyof OptionValue<GetS1<GetOption<T>, S1>>
-      : keyof OptionValue<GetS1<OptionOption<GetS1<GetOption<T>, S1>>, S2>>
+    const K extends T extends
+      | SlashCommand<infer O>
+      | SubcommandOption<any, any, infer O>
+      ? O["name"]
+      : never
   >(...options: K[]) {
     return this;
   }
 }
 
 export function autocompleteRoute<
-  T extends SlashCommand,
-  const S1 extends T extends SlashCommand<infer O>
-    ? O extends SubcommandGroupOption | SubcommandOption
-      ? O["name"]
-      : never
-    : never,
-  const S2 extends T extends SlashCommand<infer O1>
-    ? O1 extends SubcommandGroupOption<S1, any, infer O2>
-      ? O2["name"]
-      : never
-    : never
->(...args: ConstructorParameters<typeof AutocompleteRouteFrom<T, S1, S2>>) {
+  T extends SlashCommand | SubcommandGroupOption | SubcommandOption
+>(...args: ConstructorParameters<typeof AutocompleteRouteFrom<T>>) {
   return new AutocompleteRouteFrom(...args);
 }
