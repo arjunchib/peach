@@ -1,15 +1,11 @@
-import type { SlashCommand } from "../commands/slash_command";
 import type {
   DiscordInteraction,
   MessageInteractionResponseData,
 } from "../interfaces/interaction";
-import type { InteractionOption } from "../options/types";
 import { Interaction } from "./interaction";
 
-export class SlashInteraction<T extends SlashCommand> extends Interaction {
-  options: InteractionOption<T extends SlashCommand<infer K> ? K : never> =
-    {} as any;
-  // options: $infer<T["options"]> = {} as any; // set below
+export class SlashInteraction<T> extends Interaction {
+  options: T = {} as T;
 
   constructor(raw: DiscordInteraction) {
     super(raw);

@@ -1,4 +1,4 @@
-import type { JsType } from "../helpers";
+import type { ExpandRecursively, JsType } from "../helpers";
 import type { ApplicationCommandOption } from "../interfaces/application_command";
 import { Option } from "./option";
 import type { SubcommandGroupOption } from "./subcommand_group_option";
@@ -8,7 +8,7 @@ export class SubcommandOption<
   const N extends string = string,
   const V extends any = any,
   const O extends Option = Option
-> extends Option<N, V> {
+> extends Option<N, V, false, false> {
   readonly type = 1;
   private _options: O[] = [];
 

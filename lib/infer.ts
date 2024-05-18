@@ -6,13 +6,26 @@ import type { AutocompleteInteraction } from "./interactions/autocomplete_intera
 import type { MessageInteraction } from "./interactions/message_interaction";
 import type { SlashInteraction } from "./interactions/slash_interaction";
 import type { UserInteraction } from "./interactions/user_interaction";
+import type { SubcommandGroupOption } from "./options/subcommand_group_option";
+import type { SubcommandOption } from "./options/subcommand_option";
+import type { InteractionOption, OptionValue } from "./options/types";
 
-export type $slash<T extends Command> = T extends SlashCommand
-  ? SlashInteraction<T>
+type GetSlashCommandOption<T extends SlashCommand> = T extends SlashCommand<
+  infer O
+>
+  ? InteractionOption<O>
+  : never;
+
+export type $slash<
+  T extends Command | SubcommandGroupOption | SubcommandOption
+> = T extends SlashCommand
+  ? SlashInteraction<GetSlashCommandOption<T>>
   : T extends UserCommand
   ? UserInteraction
   : T extends MessageCommand
   ? MessageInteraction
+  : T extends SubcommandGroupOption | SubcommandOption
+  ? OptionValue<T>
   : never;
 
 export type $autocomplete<T extends SlashCommand> = AutocompleteInteraction<T>;

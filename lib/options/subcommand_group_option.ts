@@ -1,3 +1,4 @@
+import type { ExpandRecursively } from "../helpers";
 import type { ApplicationCommandOption } from "../interfaces/application_command";
 import { Option } from "./option";
 import type { SubcommandOption } from "./subcommand_option";
@@ -7,7 +8,7 @@ export class SubcommandGroupOption<
   const N extends string = string,
   const V extends any = any,
   const O extends SubcommandOption = SubcommandOption
-> extends Option<N, V> {
+> extends Option<N, V, false, false> {
   readonly type = 2;
   private _options: O[] = [];
 

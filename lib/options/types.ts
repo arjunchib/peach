@@ -1,3 +1,4 @@
+import type { ExpandRecursively } from "../helpers";
 import type { Option } from "./option";
 import type { SubcommandGroupOption } from "./subcommand_group_option";
 import type { SubcommandOption } from "./subcommand_option";
@@ -12,8 +13,9 @@ export type OptionOption<T extends Option> = T extends
   ? O
   : never;
 
-export type InteractionOption<T extends Option> = InteractionOptionRequired<T> &
-  InteractionOptionOptional<T>;
+export type InteractionOption<T extends Option> = ExpandRecursively<
+  InteractionOptionRequired<T> & InteractionOptionOptional<T>
+>;
 
 type InteractionOptionRequired<T extends Option> = {
   [P in T as P extends Option<any, any, true, any>
