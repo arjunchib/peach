@@ -16,4 +16,4 @@ export { commandRoute } from "./lib/routes/command_route";
 export { customIdRoute } from "./lib/routes/custom_id_route";
 
 export type { User } from "./lib/interfaces/user";
-export type { $autocomplete, $slash } from "./lib/infer";
+export type { $autocomplete, $slash, $focus } from "./lib/infer";

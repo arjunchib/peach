@@ -1,5 +1,7 @@
 import type { ApplicationCommand } from "../interfaces/application_command";
 import type { Option } from "../options/option";
+import { SubcommandGroupOption } from "../options/subcommand_group_option";
+import { SubcommandOption } from "../options/subcommand_option";
 import { Command } from "./command";
 
 export class SlashCommand<const T extends Option = Option> extends Command {
@@ -12,6 +14,14 @@ export class SlashCommand<const T extends Option = Option> extends Command {
 
   options<const K extends Option>(options: K[]) {
     this._options = options as any;
+    this._options.forEach((opt) => {
+      if (
+        opt instanceof SubcommandGroupOption ||
+        opt instanceof SubcommandOption
+      ) {
+        (opt as any)["_parent"] = this;
+      }
+    });
     return this as unknown as SlashCommand<K>;
   }
 

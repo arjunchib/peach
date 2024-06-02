@@ -1,3 +1,4 @@
+import type { SlashCommand } from "../commands/slash_command";
 import type { ExpandRecursively, JsType } from "../helpers";
 import type { ApplicationCommandOption } from "../interfaces/application_command";
 import { Option } from "./option";
@@ -11,6 +12,7 @@ export class SubcommandOption<
 > extends Option<N, V, false, false> {
   readonly type = 1;
   private _options: O[] = [];
+  private _parent!: SlashCommand | SubcommandGroupOption;
 
   constructor(name: N, description: string) {
     super(name, description);

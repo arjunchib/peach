@@ -1,5 +1,5 @@
 import type { Route } from "..";
-import type { Commands } from "./commands/create_commands";
+import type { Command } from "./commands/command";
 import { InjectionToken, inject } from "./injector";
 import { CommandService } from "./services/command_service";
 import { DiscordRestService } from "./services/discord_rest_service";
@@ -14,7 +14,7 @@ declare global {
 export interface AppConfig {
   token: string;
   applicationId: string;
-  commands: Commands;
+  commands: Record<string, Command>;
   routes: Route[];
   intents?: number;
   syncCommands?: {

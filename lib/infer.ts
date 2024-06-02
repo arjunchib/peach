@@ -25,7 +25,15 @@ export type $slash<
   : T extends MessageCommand
   ? MessageInteraction
   : T extends SubcommandGroupOption | SubcommandOption
-  ? OptionValue<T>
+  ? SlashInteraction<OptionValue<T>>
   : never;
 
-export type $autocomplete<T extends SlashCommand> = AutocompleteInteraction<T>;
+export type $autocomplete<
+  T extends SlashCommand | SubcommandGroupOption | SubcommandOption
+> = T extends SlashCommand
+  ? AutocompleteInteraction<GetSlashCommandOption<T>>
+  : T extends SubcommandGroupOption | SubcommandOption
+  ? AutocompleteInteraction<OptionValue<T>>
+  : never;
+
+export type $focus<T> = AutocompleteInteraction<any, T>;

@@ -1,17 +1,17 @@
-import type { SlashCommand } from "../commands/slash_command";
-import type { JsType } from "../helpers";
+import { SlashCommand } from "../commands/slash_command";
 import type { Choice, DiscordInteraction } from "../interfaces/interaction";
-import type { Option } from "../options/option";
-import type { AutocompleteOption } from "../options/types";
+import { SubcommandGroupOption } from "../options/subcommand_group_option";
+import type { SubcommandOption } from "../options/subcommand_option";
 import { Interaction } from "./interaction";
 
-export class AutocompleteInteraction<
-  T extends SlashCommand
-> extends Interaction {
-  options: AutocompleteOption<T extends SlashCommand<infer K> ? K : never> =
-    {} as any; // set below
+export class AutocompleteInteraction<T, F = any> extends Interaction {
+  options: T = {} as T;
+  focused!: F;
 
-  constructor(raw: DiscordInteraction) {
+  constructor(
+    raw: DiscordInteraction,
+    private command: SlashCommand | SubcommandGroupOption | SubcommandOption
+  ) {
     super(raw);
     this.setOptions();
   }
@@ -25,13 +25,22 @@ export class AutocompleteInteraction<
   }
 
   private setOptions() {
-    if (this.raw.data?.options) {
-      for (const option of this.raw.data.options) {
-        (this.options as any)[option.name] = {
-          value: option.value,
-          focused: option.focused,
-        };
-      }
+    for (const option of this.getRawOptions() ?? []) {
+      (this.options as any)[option.name] = {
+        value: option.value,
+        focused: option.focused,
+      };
+      this.focused = option.value as any;
+    }
+  }
+
+  private getRawOptions() {
+    if (this.command instanceof SlashCommand) {
+      return this.raw.data?.options;
+    } else if (this.command instanceof SubcommandGroupOption) {
+      return this.raw.data?.options?.[0].options;
+    } else {
+      return this.raw.data?.options?.[0]?.options?.[0].options;
     }
   }
 }

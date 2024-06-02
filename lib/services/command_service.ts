@@ -1,7 +1,5 @@
 import { APP_CONFIG } from "../bootstrap";
-import type { MessageCommand } from "../commands/message_command";
-import type { SlashCommand } from "../commands/slash_command";
-import type { UserCommand } from "../commands/user_command";
+import type { Command } from "../commands/command";
 import { inject } from "../injector";
 import type { ApplicationCommand } from "../interfaces/application_command";
 import { DiscordRestService } from "./discord_rest_service";
@@ -22,11 +20,7 @@ export class CommandService {
   }
 
   private async syncGlobal() {
-    const localCommands = [
-      ...Object.values(this.config.commands.slash),
-      ...Object.values(this.config.commands.user),
-      ...Object.values(this.config.commands.message),
-    ];
+    const localCommands = Object.values(this.config.commands);
     localCommands.sort(this.compareCommands);
     const hash = Bun.hash.cityHash32(JSON.stringify(localCommands));
     if (this.storeService.store.globalCommandsHash === hash) {
@@ -40,7 +34,7 @@ export class CommandService {
     remoteCommands.sort(this.compareCommands);
     if (this.commandsMatch(localCommands, remoteCommands)) {
       const commands = localCommands.map((command) =>
-        command.toApplicationCommand()
+        command["toApplicationCommand"]()
       );
       await this.discordRestService.bulkOverwriteGlobalApplicationCommands(
         commands
@@ -51,13 +45,11 @@ export class CommandService {
   private async syncGuild(id: string) {
     const guildId = this.config.syncCommands?.guildId;
     if (!guildId) throw new Error("No guild id!");
-    const localCommands = [
-      ...Object.values(this.config.commands.slash),
-      ...Object.values(this.config.commands.user),
-      ...Object.values(this.config.commands.message),
-    ];
+    const localCommands = Object.values(this.config.commands);
     localCommands.sort(this.compareCommands);
-    const hash = Bun.hash.cityHash32(JSON.stringify(localCommands));
+    const hash = Bun.hash.cityHash32(
+      JSON.stringify(localCommands.map((cmd) => cmd["toApplicationCommand"]()))
+    );
     if (this.storeService.store.guildCommandsHash === hash) {
       return;
     } else {
@@ -69,7 +61,7 @@ export class CommandService {
     remoteCommands.sort(this.compareCommands);
     if (!this.commandsMatch(localCommands, remoteCommands)) {
       const commands = localCommands.map((command) =>
-        command.toApplicationCommand()
+        command["toApplicationCommand"]()
       );
       await this.discordRestService.bulkOverwriteGuildApplicationCommands(
         guildId,
@@ -79,8 +71,8 @@ export class CommandService {
   }
 
   private compareCommands(
-    a: ApplicationCommand | SlashCommand | UserCommand | MessageCommand,
-    b: ApplicationCommand | SlashCommand | UserCommand | MessageCommand
+    a: Command | ApplicationCommand,
+    b: Command | ApplicationCommand
   ) {
     const nameComparison = a.name!.localeCompare(b.name!);
     if (nameComparison === 0) {
@@ -89,13 +81,10 @@ export class CommandService {
     return nameComparison;
   }
 
-  private commandsMatch(
-    a: (SlashCommand | UserCommand | MessageCommand)[],
-    b: ApplicationCommand[]
-  ): boolean {
+  private commandsMatch(a: Command[], b: ApplicationCommand[]): boolean {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
-      if (!a[i].equals(b[i])) return false;
+      if (!a[i]["equals"](b[i])) return false;
     }
     return true;
   }
