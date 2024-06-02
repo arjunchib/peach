@@ -16,21 +16,27 @@ export class AutocompleteInteraction<T, F = any> extends Interaction {
     this.setOptions();
   }
 
-  async respondWith(choices: Choice[]) {
+  async respondWith(choices: Choice[] | string[] | number[]) {
+    const myChoices = choices.map((c) => {
+      if (typeof c === "object") {
+        return c;
+      }
+      return {
+        name: c.toString(),
+        value: c,
+      } satisfies Choice;
+    });
     await this.discordRestService.createInteractionResponse(
       this.raw.id,
       this.raw.token,
-      { type: 8, data: { choices } }
+      { type: 8, data: { choices: myChoices } }
     );
   }
 
   private setOptions() {
     for (const option of this.getRawOptions() ?? []) {
-      (this.options as any)[option.name] = {
-        value: option.value,
-        focused: option.focused,
-      };
-      this.focused = option.value as any;
+      (this.options as any)[option.name] = option.value;
+      if (option.focused) this.focused = option.value as any;
     }
   }
 
