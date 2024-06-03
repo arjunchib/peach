@@ -1,4 +1,5 @@
 import { SlashCommand } from "../commands/slash_command";
+import type { BaseButton } from "../components/base_button";
 import type {
   DiscordInteraction,
   MessageInteractionResponseData,
@@ -18,9 +19,18 @@ export class SlashInteraction<T> extends Interaction {
     this.setOptions();
   }
 
-  async respondWith(response: string | MessageInteractionResponseData) {
+  async respondWith(
+    response: string | MessageInteractionResponseData | BaseButton[][]
+  ) {
     if (typeof response === "string") {
       response = { content: response };
+    }
+    if (Array.isArray(response)) {
+      const components = response.map((row) => {
+        const components = row.map((comp) => comp.toComponent());
+        return { type: 1, components };
+      });
+      response = { content: "", components };
     }
     await this.discordRestService.createInteractionResponse(
       this.raw.id,

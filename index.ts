@@ -1,3 +1,8 @@
+export { ComponentInteraction } from "./lib/interactions/component_interaction";
+
+export { button } from "./lib/components/button";
+export { link } from "./lib/components/link";
+
 export { number } from "./lib/options/number_option";
 export { user } from "./lib/options/user_option";
 export { bootstrap } from "./lib/bootstrap";

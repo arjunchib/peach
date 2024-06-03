@@ -1,4 +1,5 @@
-import type { Command } from "../commands/command";
+import { ComponentInteraction } from "../interactions/component_interaction";
+import type { DiscordInteraction } from "../interfaces/interaction";
 import { Route } from "./route";
 
 export class CustomIdRoute<T extends new () => any> extends Route {
@@ -9,9 +10,33 @@ export class CustomIdRoute<T extends new () => any> extends Route {
   ) {
     super(controller, method);
   }
+
+  matches(interaction: DiscordInteraction): boolean {
+    if (interaction.type !== 3) return false;
+    if (!interaction.data?.custom_id) return false;
+    if (typeof this.matcher === "string") {
+      return interaction.data?.custom_id === this.matcher;
+    } else {
+      return this.matcher.test(interaction.data?.custom_id);
+    }
+  }
+
+  async execute(interaction: DiscordInteraction): Promise<void> {
+    const itn = new ComponentInteraction(interaction);
+    await this.forwardToController(itn);
+  }
 }
-export function customIdRoute<T extends new () => any>(
-  ...args: ConstructorParameters<typeof CustomIdRoute<T>>
+
+export class CustomIdRouteFrom {
+  constructor(public matcher: string | RegExp) {}
+
+  to<K extends new () => any>(controller: K, method: keyof InstanceType<K>) {
+    return new CustomIdRoute(this.matcher, controller, method);
+  }
+}
+
+export function customIdRoute(
+  ...args: ConstructorParameters<typeof CustomIdRouteFrom>
 ) {
-  return new CustomIdRoute(...args);
+  return new CustomIdRouteFrom(...args);
 }

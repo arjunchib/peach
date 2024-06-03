@@ -5,7 +5,7 @@ export interface DiscordInteraction {
   id: string;
   application_id: string;
   type: 1 | 2 | 3 | 4 | 5;
-  data?: ApplicationCommandData;
+  data?: ApplicationCommandData & MessageComponentData;
   guild_id?: string;
   channel?: any;
   channel_id?: string;
@@ -45,6 +45,13 @@ export interface ApplicationCommandDataOption {
   value?: boolean | string | number;
   options?: ApplicationCommandDataOption[];
   focused?: boolean;
+}
+
+export interface MessageComponentData {
+  custom_id: string;
+  component_type: number;
+  values?: any;
+  resolved?: any;
 }
 
 export interface InteractionResponse {
