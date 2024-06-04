@@ -1,4 +1,5 @@
 import type { Embed } from "./embed";
+import type { Message } from "./message";
 import type { User } from "./user";
 
 export interface DiscordInteraction {
@@ -13,7 +14,7 @@ export interface DiscordInteraction {
   user?: any;
   token: string;
   version: number;
-  message?: any;
+  message?: Message;
   app_permissions?: string;
   locale?: string;
   guild_locale?: string;

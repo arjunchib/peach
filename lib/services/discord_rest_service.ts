@@ -3,7 +3,11 @@ import { HttpClient } from "../http_client";
 import { inject } from "../injector";
 import type { ApplicationCommand } from "../interfaces/application_command";
 import type { GuildMember } from "../interfaces/guild_member";
-import type { InteractionResponse } from "../interfaces/interaction";
+import type {
+  InteractionResponse,
+  MessageInteractionResponseData,
+} from "../interfaces/interaction";
+import type { Message } from "../interfaces/message";
 
 export class DiscordRestService {
   private config = inject(APP_CONFIG);
@@ -55,6 +59,39 @@ export class DiscordRestService {
     return await this.http.post(
       `/interactions/${interactionId}/${interactionToken}/callback`,
       response
+    );
+  }
+
+  async createFollowupMessage(
+    interactionToken: string,
+    response: MessageInteractionResponseData
+  ) {
+    return await this.http.post<Message>(
+      `/webhooks/${this.config.applicationId}/${interactionToken}`,
+      response
+    );
+  }
+
+  async deleteFollowupMessage(interactionToken: string, messageId: string) {
+    return await this.http.delete(
+      `/webhooks/${this.config.applicationId}/${interactionToken}/messages/${messageId}`
+    );
+  }
+
+  async deleteMessage(channelId: string, messageId: string) {
+    return await this.http.delete(
+      `/channels/${channelId}/messages/${messageId}`
+    );
+  }
+
+  async editMessage(
+    channelId: string,
+    messageId: string,
+    message: Partial<Message>
+  ) {
+    return await this.http.patch(
+      `/channels/${channelId}/messages/${messageId}`,
+      message
     );
   }
 

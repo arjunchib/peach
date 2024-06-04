@@ -39,6 +39,25 @@ export class SlashInteraction<T> extends Interaction {
     );
   }
 
+  async followupWith(
+    response: string | MessageInteractionResponseData | BaseButton[][]
+  ) {
+    if (typeof response === "string") {
+      response = { content: response };
+    }
+    if (Array.isArray(response)) {
+      const components = response.map((row) => {
+        const components = row.map((comp) => comp.toComponent());
+        return { type: 1, components };
+      });
+      response = { content: "", components };
+    }
+    await this.discordRestService.createFollowupMessage(this.raw.token, {
+      ...response,
+      flags: 64,
+    });
+  }
+
   private setOptions() {
     for (const option of this.getRawOptions() ?? []) {
       if (option.type === 6) {

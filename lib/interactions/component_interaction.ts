@@ -23,10 +23,18 @@ export class ComponentInteraction extends Interaction {
       });
       response = { content: "", components };
     }
-    await this.discordRestService.createInteractionResponse(
+    return await this.discordRestService.createInteractionResponse(
       this.raw.id,
       this.raw.token,
       { type: 7, data: response }
+    );
+  }
+
+  async defer() {
+    return await this.discordRestService.createInteractionResponse(
+      this.raw.id,
+      this.raw.token,
+      { type: 6 }
     );
   }
 }
