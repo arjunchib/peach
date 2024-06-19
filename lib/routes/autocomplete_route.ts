@@ -1,6 +1,6 @@
 import { SlashCommand } from "../commands/slash_command";
 import { AutocompleteInteraction } from "../interactions/autocomplete_interaction";
-import type { DiscordInteraction } from "../interfaces/interaction";
+import type { Interaction } from "../interactions/interaction";
 import { SubcommandGroupOption } from "../options/subcommand_group_option";
 import type { SubcommandOption } from "../options/subcommand_option";
 import { Route } from "./route";
@@ -18,7 +18,7 @@ export class AutocompleteRoute extends Route {
     this.parentCommand = this.getParentCommand(this.command);
   }
 
-  matches(interaction: DiscordInteraction): boolean {
+  matches(interaction: Interaction): boolean {
     if (interaction.type !== 4) return false;
     if (interaction.data?.name !== this.parentCommand.name) return false;
     const rawOptions = this.getRawOptions(interaction);
@@ -36,7 +36,7 @@ export class AutocompleteRoute extends Route {
     return true;
   }
 
-  async execute(interaction: DiscordInteraction): Promise<void> {
+  async execute(interaction: Interaction): Promise<void> {
     const itn = new AutocompleteInteraction(interaction, this.command);
     await this.forwardToController(itn);
   }
@@ -53,7 +53,7 @@ export class AutocompleteRoute extends Route {
     }
   }
 
-  private getRawOptions(interaction: DiscordInteraction) {
+  private getRawOptions(interaction: Interaction) {
     if (this.command instanceof SlashCommand) {
       return interaction.data;
     } else if (this.command instanceof SubcommandGroupOption) {

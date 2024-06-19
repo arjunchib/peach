@@ -1,5 +1,5 @@
 import { ComponentInteraction } from "../interactions/component_interaction";
-import type { DiscordInteraction } from "../interfaces/interaction";
+import type { Interaction } from "../interactions/interaction";
 import { Route } from "./route";
 
 export class CustomIdRoute<T extends new () => any> extends Route {
@@ -11,7 +11,7 @@ export class CustomIdRoute<T extends new () => any> extends Route {
     super(controller, method);
   }
 
-  matches(interaction: DiscordInteraction): boolean {
+  matches(interaction: Interaction): boolean {
     if (interaction.type !== 3) return false;
     if (!interaction.data?.custom_id) return false;
     if (typeof this.matcher === "string") {
@@ -21,7 +21,7 @@ export class CustomIdRoute<T extends new () => any> extends Route {
     }
   }
 
-  async execute(interaction: DiscordInteraction): Promise<void> {
+  async execute(interaction: Interaction): Promise<void> {
     const itn = new ComponentInteraction(interaction);
     await this.forwardToController(itn);
   }

@@ -1,5 +1,4 @@
 import type { Interaction } from "../interactions/interaction";
-import type { DiscordInteraction } from "../interfaces/interaction";
 import { logger } from "../logger";
 
 export abstract class Route {
@@ -8,9 +7,9 @@ export abstract class Route {
     public method: string | number | symbol
   ) {}
 
-  abstract matches(interaction: DiscordInteraction): boolean;
+  abstract matches(interaction: Interaction): boolean;
 
-  abstract execute(interaction: DiscordInteraction): Promise<void>;
+  abstract execute(interaction: Interaction): Promise<void>;
 
   protected async forwardToController(interaction: Interaction) {
     logger.router(

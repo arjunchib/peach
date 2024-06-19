@@ -1,6 +1,6 @@
 import { SlashCommand } from "../commands/slash_command";
+import type { Interaction } from "../interactions/interaction";
 import { SlashInteraction } from "../interactions/slash_interaction";
-import type { DiscordInteraction } from "../interfaces/interaction";
 import { SubcommandGroupOption } from "../options/subcommand_group_option";
 import type { SubcommandOption } from "../options/subcommand_option";
 import { Route } from "./route";
@@ -17,7 +17,7 @@ export class CommandRoute extends Route {
     this.parentCommand = this.getParentCommand(this.command);
   }
 
-  matches(interaction: DiscordInteraction): boolean {
+  matches(interaction: Interaction): boolean {
     if (interaction.type !== 2) return false;
     if (interaction.data?.name !== this.parentCommand.name) return false;
     if (this.command instanceof SlashCommand) {
@@ -31,7 +31,7 @@ export class CommandRoute extends Route {
     }
   }
 
-  async execute(interaction: DiscordInteraction): Promise<void> {
+  async execute(interaction: Interaction): Promise<void> {
     const itn = new SlashInteraction(interaction, this.command);
     await this.forwardToController(itn);
   }

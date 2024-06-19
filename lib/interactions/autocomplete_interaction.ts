@@ -1,19 +1,23 @@
 import { SlashCommand } from "../commands/slash_command";
-import type { Choice, DiscordInteraction } from "../interfaces/interaction";
+import type { ApplicationCommandData, Choice } from "../interfaces/interaction";
 import { SubcommandGroupOption } from "../options/subcommand_group_option";
 import type { SubcommandOption } from "../options/subcommand_option";
 import { Interaction } from "./interaction";
 
+export interface AutocompleteInteraction<T, F = any> {
+  type: 4;
+  data: ApplicationCommandData;
+}
+
 export class AutocompleteInteraction<T, F = any> extends Interaction {
-  options: T = {} as T;
-  focused!: F;
+  _options: any;
+  _focused: any;
 
   constructor(
-    raw: DiscordInteraction,
+    interaction: any,
     private command: SlashCommand | SubcommandGroupOption | SubcommandOption
   ) {
-    super(raw);
-    this.setOptions();
+    super(interaction);
   }
 
   async respondWith(choices: Choice[] | string[] | number[]) {
@@ -27,26 +31,39 @@ export class AutocompleteInteraction<T, F = any> extends Interaction {
       } satisfies Choice;
     });
     await this.discordRestService.createInteractionResponse(
-      this.raw.id,
-      this.raw.token,
+      this.id,
+      this.token,
       { type: 8, data: { choices: myChoices } }
     );
   }
 
+  options(): T {
+    if (this._options) return this._options;
+    this.setOptions();
+    return this._options;
+  }
+
+  focus(): F {
+    if (this._focused) return this._focused;
+    this.setOptions();
+    return this._focused;
+  }
+
   private setOptions() {
+    this._options = {};
     for (const option of this.getRawOptions() ?? []) {
-      (this.options as any)[option.name] = option.value;
-      if (option.focused) this.focused = option.value as any;
+      (this._options as any)[option.name] = option.value;
+      if (option.focused) this._focused = option.value as any;
     }
   }
 
   private getRawOptions() {
     if (this.command instanceof SlashCommand) {
-      return this.raw.data?.options;
+      return this.data?.options;
     } else if (this.command instanceof SubcommandGroupOption) {
-      return this.raw.data?.options?.[0].options;
+      return this.data?.options?.[0].options;
     } else {
-      return this.raw.data?.options?.[0]?.options?.[0].options;
+      return this.data?.options?.[0]?.options?.[0].options;
     }
   }
 }

@@ -1,15 +1,14 @@
 import type { BaseButton } from "../components/base_button";
-import type {
-  DiscordInteraction,
-  MessageInteractionResponseData,
-} from "../interfaces/interaction";
+import type { MessageInteractionResponseData } from "../interfaces/interaction";
+import type { Message } from "../interfaces/message";
 import { Interaction } from "./interaction";
 
-export class ComponentInteraction extends Interaction {
-  constructor(raw: DiscordInteraction) {
-    super(raw);
-  }
+export interface ComponentInteraction {
+  type: 3;
+  message: Message;
+}
 
+export class ComponentInteraction extends Interaction {
   async respondWith(
     response: string | MessageInteractionResponseData | BaseButton[][]
   ) {
@@ -24,16 +23,16 @@ export class ComponentInteraction extends Interaction {
       response = { content: "", components };
     }
     return await this.discordRestService.createInteractionResponse(
-      this.raw.id,
-      this.raw.token,
+      this.id,
+      this.token,
       { type: 7, data: response }
     );
   }
 
   async defer() {
     return await this.discordRestService.createInteractionResponse(
-      this.raw.id,
-      this.raw.token,
+      this.id,
+      this.token,
       { type: 6 }
     );
   }

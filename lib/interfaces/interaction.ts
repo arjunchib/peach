@@ -2,25 +2,6 @@ import type { Embed } from "./embed";
 import type { Message } from "./message";
 import type { User } from "./user";
 
-export interface DiscordInteraction {
-  id: string;
-  application_id: string;
-  type: 1 | 2 | 3 | 4 | 5;
-  data?: ApplicationCommandData & MessageComponentData;
-  guild_id?: string;
-  channel?: any;
-  channel_id?: string;
-  member?: any;
-  user?: any;
-  token: string;
-  version: number;
-  message?: Message;
-  app_permissions?: string;
-  locale?: string;
-  guild_locale?: string;
-  entitlements: any[];
-}
-
 export interface ApplicationCommandData {
   id: string;
   name: string;
