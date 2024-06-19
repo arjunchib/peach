@@ -68,9 +68,9 @@ export class SlashInteraction<T> extends Interaction {
     for (const option of this.getRawOptions() ?? []) {
       if (option.type === 6) {
         const user = this.data?.resolved?.users?.[option.value as any];
-        (this.options as any)[option.name] = user;
+        (this._options as any)[option.name] = user;
       } else {
-        (this.options as any)[option.name] = option.value;
+        (this._options as any)[option.name] = option.value;
       }
     }
     return this._options;
