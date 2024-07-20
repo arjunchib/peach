@@ -62,6 +62,22 @@ export class DiscordRestService {
     );
   }
 
+  async editOriginalInteractionResponse(
+    interactionToken: string,
+    response: MessageInteractionResponseData
+  ) {
+    return await this.http.patch(
+      `/webhooks/${this.config.applicationId}/${interactionToken}/messages/@original`,
+      response
+    );
+  }
+
+  async deleteOriginalInteractionResponse(interactionToken: string) {
+    return await this.http.delete(
+      `/webhooks/${this.config.applicationId}/${interactionToken}/messages/@original`
+    );
+  }
+
   async createFollowupMessage(
     interactionToken: string,
     response: MessageInteractionResponseData
