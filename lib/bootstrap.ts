@@ -1,6 +1,7 @@
 import type { Route } from "..";
 import type { Command } from "./commands/command";
 import { InjectionToken, inject } from "./injector";
+import { logger } from "./logger";
 import { CommandService } from "./services/command_service";
 import { DiscordRestService } from "./services/discord_rest_service";
 import { GatewayService } from "./services/gateway_service";
@@ -28,6 +29,7 @@ export const APP_CONFIG = new InjectionToken<AppConfig>("APP_CONFIG");
 
 export async function bootstrap(config: AppConfig) {
   inject(APP_CONFIG, config);
+  logger.init(!!config.debug);
   const storeService = inject(StoreService);
   await storeService.init();
   const commandService = inject(CommandService);
