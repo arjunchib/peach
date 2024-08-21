@@ -74,8 +74,14 @@ export class VoiceConnection {
 
   playAudio(data: BunFile | Response | ReadableStream) {
     logger.voice("Start audio");
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>(async (resolve, reject) => {
       if (data instanceof Response) {
+        if (!data.ok) {
+          reject(
+            `Cannot play meme with status ${data.status} ${data.statusText}`
+          );
+          return;
+        }
         // downloads whole meme upfront
         // creates a pause before playing but guarantees smooth playback
         data = (await data.blob()).stream();
