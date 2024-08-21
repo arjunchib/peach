@@ -66,7 +66,7 @@ export class SlashInteraction<T> extends Interaction {
       });
       response = { content: "", components };
     }
-    if (response.components?.[0] instanceof Component) {
+    if (response.components?.[0]?.[0] instanceof Component) {
       const components = response.components.map((row) => {
         const components = row.map((comp: Component) => comp.toComponent());
         return { type: 1, components };
@@ -75,7 +75,6 @@ export class SlashInteraction<T> extends Interaction {
     }
     await this.discordRestService.createFollowupMessage(this.token, {
       ...response,
-      flags: 64,
     });
   }
 
