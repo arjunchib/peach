@@ -33,8 +33,9 @@ function randomNBit(numberOfBits: number) {
 }
 
 export class VoiceConnection {
-  private gatewayService = inject(GatewayService);
+  static all = new Map<string, VoiceConnection>();
 
+  private gatewayService = inject(GatewayService);
   private sessionId?: string;
   private token?: string;
   private guildId?: string;
@@ -60,6 +61,9 @@ export class VoiceConnection {
     options: VoiceStateUpdateSendEvent["d"],
     cb?: (voiceConn: VoiceConnection) => void
   ) {
+    if (VoiceConnection.all.has(options.guild_id))
+      throw new Error("VoiceConnection for this guild already exists");
+    VoiceConnection.all.set(options.guild_id, this);
     this.gatewayService.sendVoiceStateUpdate(options);
     this.gatewayService.on(
       "VOICE_STATE_UPDATE",
@@ -125,6 +129,7 @@ export class VoiceConnection {
     this.ws?.close();
     clearInterval(this.audioTimer);
     clearInterval(this.heartbeatTimer);
+    VoiceConnection.all.delete(this.guildId!);
   }
 
   private setSpeaking(speaking: number) {
