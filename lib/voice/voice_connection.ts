@@ -98,21 +98,25 @@ export class VoiceConnection {
       let silenceCount = 0;
       if (this.audioTimer) clearInterval(this.audioTimer);
       this.audioTimer = setInterval(async () => {
-        const chunk = await reader.read();
-        if (chunk.done) {
-          if (silenceCount++ < 5) {
-            this.sendAudioPacket(
-              new Uint8Array(new Uint32Array([0xf8, 0xff, 0xfe]))
-            );
+        try {
+          const chunk = await reader.read();
+          if (chunk.done) {
+            if (silenceCount++ < 5) {
+              this.sendAudioPacket(
+                new Uint8Array(new Uint32Array([0xf8, 0xff, 0xfe]))
+              );
+            } else {
+              logger.voice("End audio");
+              clearInterval(this.audioTimer);
+              reader.releaseLock();
+              this.setSpeaking(0);
+              resolve();
+            }
           } else {
-            logger.voice("End audio");
-            clearInterval(this.audioTimer);
-            reader.releaseLock();
-            this.setSpeaking(0);
-            resolve();
+            this.sendAudioPacket(chunk.value);
           }
-        } else {
-          this.sendAudioPacket(chunk.value);
+        } catch (e) {
+          reject(e);
         }
       }, 20);
     });
