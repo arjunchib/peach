@@ -1,5 +1,4 @@
 import type { BunFile, udp } from "bun";
-import { APP_CONFIG } from "../bootstrap";
 import { inject } from "../injector";
 import type {
   VoiceServerUpdateEvent,
@@ -82,7 +81,9 @@ export class VoiceConnection {
       if (data instanceof Response) {
         if (!data.ok) {
           reject(
-            `Cannot play meme with status ${data.status} ${data.statusText}`
+            new Error(
+              `Cannot play meme with status ${data.status} ${data.statusText}`
+            )
           );
           return;
         }
