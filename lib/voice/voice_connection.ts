@@ -238,7 +238,8 @@ export class VoiceConnection {
     }
   }
 
-  private async handleMessage(message: MessageEvent) {
+  private async handleMessage(message: any) {
+    const { data } = message as MessageEvent;
     const event: VoiceGatewayEvent = JSON.parse(message.data);
     logger.voice("Websocket receive", event);
     switch (event.op) {
@@ -266,9 +267,10 @@ export class VoiceConnection {
     });
   }
 
-  private handleClose(event: CloseEvent) {
-    logger.voice(`Websocket disconnected ${event.code}`);
-    if (event.code >= 4000 && event.code < 5000) {
+  private handleClose(event: any) {
+    const { code } = event as CloseEvent;
+    logger.voice(`Websocket disconnected ${code}`);
+    if (code >= 4000 && code < 5000) {
       clearInterval(this.heartbeatTimer);
       logger.voice(`Voice connection closed`);
     } else {

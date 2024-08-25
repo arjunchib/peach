@@ -110,7 +110,7 @@ export class GatewayService {
   }
 
   private disconnect(code?: number) {
-    if (this.ws) {
+    if (this.ws && !this.ws.CLOSED) {
       this.ws.close(code);
     }
   }

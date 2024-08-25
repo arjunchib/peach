@@ -23,6 +23,7 @@ export interface AppConfig {
     guildId?: string;
   };
   debug?: boolean;
+  error?: (error: unknown) => Promise<void> | void;
 }
 
 export const APP_CONFIG = new InjectionToken<AppConfig>("APP_CONFIG");
