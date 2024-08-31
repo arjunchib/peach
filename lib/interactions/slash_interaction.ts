@@ -1,12 +1,13 @@
 import { SlashCommand } from "../commands/slash_command";
-import type { BaseButton } from "../components/base_button";
 import { Component } from "../components/component";
+import { lazyInject } from "../injector";
 import type {
   ApplicationCommandData,
   MessageInteractionResponseData,
 } from "../interfaces/interaction";
 import { SubcommandGroupOption } from "../options/subcommand_group_option";
 import type { SubcommandOption } from "../options/subcommand_option";
+import { WebhookService } from "../services/webhook_service";
 import { Interaction } from "./interaction";
 
 export interface SlashInteraction<T> {
@@ -15,6 +16,8 @@ export interface SlashInteraction<T> {
 }
 
 export class SlashInteraction<T> extends Interaction {
+  private webhookService = lazyInject(WebhookService);
+
   private _options: any;
 
   constructor(
@@ -46,11 +49,24 @@ export class SlashInteraction<T> extends Interaction {
       // console.log(components);
       response.components = components;
     }
-    await this.discordRestService.createInteractionResponse(
-      this.id,
-      this.token,
-      { type: 4, data: response }
-    );
+    if (this.webhookService) {
+      const [resolve, reject] =
+        this.webhookService.resolvers.get(this.id) ?? [];
+      if (!resolve || !reject) {
+        throw new Error("Missing interaction resolvers");
+      }
+      try {
+        resolve({ type: 4, data: response });
+      } catch (e) {
+        reject(e);
+      }
+    } else {
+      await this.discordRestService.createInteractionResponse(
+        this.id,
+        this.token,
+        { type: 4, data: response }
+      );
+    }
   }
 
   async followupWith(
@@ -134,7 +150,11 @@ export class SlashInteraction<T> extends Interaction {
     } else if (this.command instanceof SubcommandGroupOption) {
       return this.data?.options?.[0].options;
     } else {
-      return this.data?.options?.[0]?.options?.[0].options;
+      if (this.data?.options?.[0]?.options?.[0]?.options) {
+        return this.data?.options?.[0]?.options?.[0]?.options;
+      } else {
+        return this.data?.options?.[0]?.options;
+      }
     }
   }
 }

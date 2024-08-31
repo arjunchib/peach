@@ -25,8 +25,10 @@ export class CommandRoute extends Route {
     } else if (this.command instanceof SubcommandGroupOption) {
       return interaction.data?.options?.[0].name === this.command.name;
     } else {
+      const firstLevel = interaction.data.options?.[0];
       return (
-        interaction.data?.options?.[0]?.options?.[0].name === this.command.name
+        firstLevel.name === this.command.name ||
+        firstLevel?.options?.[0].name === this.command.name
       );
     }
   }

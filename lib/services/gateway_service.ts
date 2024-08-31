@@ -1,4 +1,4 @@
-import { APP_CONFIG, type AppConfig } from "../bootstrap";
+import { GATEWAY_CONFIG } from "../bootstrap";
 import { inject } from "../injector";
 import type {
   DispatchEvent,
@@ -19,7 +19,7 @@ import { StoreService } from "./store_service";
 const RESUMABLE_CLOSE_CODES = [4000, 4001, 4002, 4003, 4005, 4007, 4008, 4009];
 
 export class GatewayService {
-  private config = inject(APP_CONFIG);
+  private config = inject(GATEWAY_CONFIG);
   private discordRestService = inject(DiscordRestService);
   private routerService = inject(RouterService);
   private storeService = inject(StoreService);
@@ -41,21 +41,17 @@ export class GatewayService {
     (event: DispatchEvent) => Promise<void> | void
   >();
 
-  async init(
-    config: AppConfig,
-    discordRestService: DiscordRestService,
-    routerService: RouterService,
-    storeService: StoreService
-  ) {
+  async init() {
     const { resumeGatewayUrl, sessionId, sequenceNumber } =
       this.storeService.store;
     // check if we hot reloaded by seeing if a websocket connection exists
     if (this.ws) {
       logger.gateway("Reusing gateway");
-      this.config = config;
-      this.discordRestService = discordRestService;
-      this.routerService = routerService;
-      this.storeService = storeService;
+      // re-inject values
+      this.config = inject(GATEWAY_CONFIG);
+      this.discordRestService = inject(DiscordRestService);
+      this.routerService = inject(RouterService);
+      this.storeService = inject(StoreService);
     } else if (resumeGatewayUrl && sessionId && sequenceNumber) {
       logger.gateway("Resuming gateway");
       this.resumeGatewayUrl = resumeGatewayUrl;

@@ -5,7 +5,7 @@ export { link } from "./lib/components/link";
 
 export { number } from "./lib/options/number_option";
 export { user } from "./lib/options/user_option";
-export { bootstrap } from "./lib/bootstrap";
+export { bootstrapGateway, bootstrapWebhook } from "./lib/bootstrap";
 export { slashCommand } from "./lib/commands/slash_command";
 export { userCommand } from "./lib/commands/user_command";
 export { messageCommand } from "./lib/commands/message_command";

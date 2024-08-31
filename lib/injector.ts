@@ -29,4 +29,10 @@ export function inject<T>(token: Token, initialValue?: T): T {
   }
 }
 
+export function lazyInject<T>(token: new () => T): T | undefined;
+export function lazyInject<T>(token: InjectionToken<T>): T | undefined;
+export function lazyInject<T>(token: Token): T | undefined {
+  return rootProvider.dependencies.get(token);
+}
+
 export const rootProvider = new DependencyProvider();
