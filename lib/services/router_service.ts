@@ -11,7 +11,11 @@ export class RouterService {
       try {
         await route.execute(interaction);
       } catch (e) {
-        await this.config.error?.(e);
+        if (this.config.error) {
+          await this.config.error(e);
+        } else {
+          console.error(e);
+        }
       }
     } else {
       logger.router("No route matching interaction");
