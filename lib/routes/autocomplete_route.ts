@@ -59,7 +59,10 @@ export class AutocompleteRoute extends Route {
     } else if (this.command instanceof SubcommandGroupOption) {
       return interaction.data?.options?.[0];
     } else {
-      return interaction.data?.options?.[0]?.options?.[0];
+      return (
+        interaction.data?.options?.[0]?.options?.[0] ||
+        interaction.data?.options?.[0]
+      );
     }
   }
 }
