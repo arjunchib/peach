@@ -42,17 +42,18 @@ export class GatewayService {
   >();
 
   async init() {
-    const { resumeGatewayUrl, sessionId, sequenceNumber } =
-      this.storeService.store;
     // check if we hot reloaded by seeing if a websocket connection exists
     if (this.ws) {
       logger.gateway("Reusing gateway");
-      // re-inject values
       this.config = inject(GATEWAY_CONFIG);
       this.discordRestService = inject(DiscordRestService);
       this.routerService = inject(RouterService);
       this.storeService = inject(StoreService);
-    } else if (resumeGatewayUrl && sessionId && sequenceNumber) {
+      return;
+    }
+    const { resumeGatewayUrl, sessionId, sequenceNumber } =
+      this.storeService.store;
+    if (resumeGatewayUrl && sessionId && sequenceNumber) {
       logger.gateway("Resuming gateway");
       this.resumeGatewayUrl = resumeGatewayUrl;
       this.sessionId = sessionId;
@@ -163,9 +164,11 @@ export class GatewayService {
   private async handleMessage(e: any) {
     const event = e as MessageEvent; // some issue with bun types
     const payload: GatewayEvent = JSON.parse(event.data);
-    this.sequenceNumber = payload.s ?? null;
-    this.storeService.store.sequenceNumber = this.sequenceNumber;
-    await this.storeService.save();
+    if (payload.s) {
+      this.sequenceNumber = payload.s;
+      this.storeService.store.sequenceNumber = this.sequenceNumber;
+      await this.storeService.save();
+    }
     logger.gateway("Websocket received", payload);
     switch (payload.op) {
       case 0:
