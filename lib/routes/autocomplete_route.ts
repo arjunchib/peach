@@ -27,7 +27,7 @@ export class AutocompleteRoute extends Route {
       if (rawOptions.name !== this.command.name) return false;
       if (!rawOptions.options) return false;
       return rawOptions.options.some(
-        (opt) => opt.focused && this.focus.includes(opt.name)
+        (opt: any) => opt.focused && this.focus.includes(opt.name)
       );
     } else {
       if (!rawOptions) return true;
@@ -59,10 +59,8 @@ export class AutocompleteRoute extends Route {
     } else if (this.command instanceof SubcommandGroupOption) {
       return interaction.data?.options?.[0];
     } else {
-      return (
-        interaction.data?.options?.[0]?.options?.[0] ||
-        interaction.data?.options?.[0]
-      );
+      const firstLevel = interaction.data?.options?.[0];
+      return firstLevel.type === 1 ? firstLevel : firstLevel?.options?.[0];
     }
   }
 }

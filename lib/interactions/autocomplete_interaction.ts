@@ -63,7 +63,10 @@ export class AutocompleteInteraction<T, F = any> extends Interaction {
     } else if (this.command instanceof SubcommandGroupOption) {
       return this.data?.options?.[0].options;
     } else {
-      return this.data?.options?.[0]?.options?.[0].options;
+      const firstLevel = this.data?.options?.[0];
+      return firstLevel?.type === 1
+        ? firstLevel.options
+        : firstLevel?.options?.[0].options;
     }
   }
 }
