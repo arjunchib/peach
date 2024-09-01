@@ -6,6 +6,7 @@ interface Store {
   resumeGatewayUrl?: string;
   sessionId?: string;
   sequenceNumber?: number | null;
+  userId?: string;
 }
 
 const STORE_PATH = ".peach/store.json";

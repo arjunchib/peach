@@ -35,9 +35,10 @@ export class VoiceConnection {
   static all = new Map<string, VoiceConnection>();
 
   private gatewayService = inject(GatewayService);
+
+  private guildId: string;
   private sessionId?: string;
   private token?: string;
-  private guildId?: string;
   private endpoint?: string;
   private ws?: WebSocket;
   private udp?: udp.Socket<"buffer">;
@@ -55,6 +56,7 @@ export class VoiceConnection {
   private nonce = 0;
   private audioTimer?: Timer;
   private cb?: (voiceConn: VoiceConnection) => void;
+  private userDisconnected?: boolean;
 
   constructor(
     options: VoiceStateUpdateSendEvent["d"],
@@ -63,6 +65,7 @@ export class VoiceConnection {
     if (VoiceConnection.all.has(options.guild_id))
       throw new Error("VoiceConnection for this guild already exists");
     VoiceConnection.all.set(options.guild_id, this);
+    this.guildId = options.guild_id;
     this.gatewayService.sendVoiceStateUpdate(options);
     this.gatewayService.on(
       "VOICE_STATE_UPDATE",
@@ -124,12 +127,17 @@ export class VoiceConnection {
   }
 
   disconnect() {
+    this.userDisconnected = true;
     this.gatewayService.sendVoiceStateUpdate({
       guild_id: this.guildId!,
       channel_id: null,
       self_deaf: false,
       self_mute: false,
     });
+    this.cleanup();
+  }
+
+  private cleanup() {
     this.udp?.close();
     this.ws?.close();
     clearInterval(this.audioTimer);
@@ -209,13 +217,18 @@ export class VoiceConnection {
   }
 
   private onVoiceStateUpdate(event: VoiceStateUpdateRecvEvent) {
-    this.sessionId = event.d.session_id;
-    this.connect();
+    if (event.d.guild_id !== this.guildId) return;
+    if (event.d.channel_id) {
+      this.sessionId = event.d.session_id;
+      this.connect();
+    } else {
+      this.cleanup();
+    }
   }
 
   private onVoiceServerUpdate(event: VoiceServerUpdateEvent) {
+    if (event.d.guild_id !== this.guildId) return;
     this.token = event.d.token;
-    this.guildId = event.d.guild_id;
     this.endpoint = event.d.endpoint;
     this.connect();
   }
@@ -226,7 +239,7 @@ export class VoiceConnection {
       this.token &&
       this.guildId &&
       this.endpoint &&
-      this.gatewayService.readyEventPayload
+      this.gatewayService.userId
     ) {
       this.ws = new WebSocket(`wss://${this.endpoint}?v=4`);
       this.ws.addEventListener("message", this.handleMessage.bind(this));
@@ -239,7 +252,6 @@ export class VoiceConnection {
   }
 
   private async handleMessage(message: any) {
-    const { data } = message as MessageEvent;
     const event: VoiceGatewayEvent = JSON.parse(message.data);
     logger.voice("Websocket receive", event);
     switch (event.op) {
@@ -256,11 +268,12 @@ export class VoiceConnection {
 
   private handleOpen() {
     // these values have already been checked
+    // maybe should throw though
     this.send<VoiceIdentifyEvent>({
       op: 0,
       d: {
         server_id: this.guildId!,
-        user_id: this.gatewayService.readyEventPayload!.user.id,
+        user_id: this.gatewayService.userId!,
         session_id: this.sessionId!,
         token: this.token!,
       },
@@ -270,7 +283,7 @@ export class VoiceConnection {
   private handleClose(event: any) {
     const { code } = event as CloseEvent;
     logger.voice(`Websocket disconnected ${code}`);
-    if (code >= 4000 && code < 5000) {
+    if (this.userDisconnected || (code >= 4000 && code < 5000)) {
       clearInterval(this.heartbeatTimer);
       logger.voice(`Voice connection closed`);
     } else {

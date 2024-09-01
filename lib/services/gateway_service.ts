@@ -24,7 +24,7 @@ export class GatewayService {
   private routerService = inject(RouterService);
   private storeService = inject(StoreService);
 
-  public readyEventPayload?: ReadyEvent["d"];
+  public userId?: string;
 
   private gatewayUrl?: string;
   private ws?: WebSocket;
@@ -51,13 +51,14 @@ export class GatewayService {
       this.storeService = inject(StoreService);
       return;
     }
-    const { resumeGatewayUrl, sessionId, sequenceNumber } =
+    const { resumeGatewayUrl, sessionId, sequenceNumber, userId } =
       this.storeService.store;
-    if (resumeGatewayUrl && sessionId && sequenceNumber) {
+    if (resumeGatewayUrl && sessionId && sequenceNumber && userId) {
       logger.gateway("Resuming gateway");
       this.resumeGatewayUrl = resumeGatewayUrl;
       this.sessionId = sessionId;
       this.sequenceNumber = sequenceNumber;
+      this.userId = userId;
       this.resume();
     } else {
       logger.gateway("Connecting to new gateway");
@@ -192,9 +193,10 @@ export class GatewayService {
       await fn(event);
     }
     if (event.t === "READY") {
-      this.readyEventPayload = event.d;
+      this.userId = event.d.user.id;
       this.sessionId = event.d.session_id;
       this.resumeGatewayUrl = event.d.resume_gateway_url;
+      this.storeService.store.userId = this.userId;
       this.storeService.store.sessionId = this.sessionId;
       this.storeService.store.resumeGatewayUrl = this.resumeGatewayUrl;
       await this.storeService.save();
