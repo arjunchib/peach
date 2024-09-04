@@ -5,6 +5,7 @@ export { link } from "./lib/components/link";
 
 export { number } from "./lib/options/number_option";
 export { user } from "./lib/options/user_option";
+export { channel } from "./lib/options/channel_option";
 export { bootstrapGateway, bootstrapWebhook } from "./lib/bootstrap";
 export { slashCommand } from "./lib/commands/slash_command";
 export { userCommand } from "./lib/commands/user_command";
@@ -21,4 +22,5 @@ export { commandRoute } from "./lib/routes/command_route";
 export { customIdRoute } from "./lib/routes/custom_id_route";
 
 export type { User } from "./lib/interfaces/user";
+export type { Channel } from "./lib/interfaces/channel";
 export type { $autocomplete, $slash, $focus } from "./lib/infer";

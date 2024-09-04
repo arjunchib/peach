@@ -137,6 +137,9 @@ export class SlashInteraction<T> extends Interaction {
       if (option.type === 6) {
         const user = this.data?.resolved?.users?.[option.value as any];
         (this._options as any)[option.name] = user;
+      } else if (option.type === 7) {
+        const channel = this.data?.resolved?.channels?.[option.value as any];
+        (this._options as any)[option.name] = channel;
       } else {
         (this._options as any)[option.name] = option.value;
       }

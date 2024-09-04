@@ -27,7 +27,7 @@ export class UserOption<
   equals(option: ApplicationCommandOption): boolean {
     return (
       super.equals(option) &&
-      option.type === 3 &&
+      option.type === 3 && // this seems wrong
       this.description === option.description &&
       this.name === option.name
     );
