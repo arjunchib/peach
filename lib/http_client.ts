@@ -67,7 +67,7 @@ export class HttpClient {
     return await this.request("TRACE", url);
   }
 
-  async patch(url: string, body?: any) {
-    return await this.request("PATCH", url, body);
+  async patch<T>(url: string, body?: any) {
+    return await this.request<T>("PATCH", url, body);
   }
 }
