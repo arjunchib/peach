@@ -19,18 +19,19 @@ export class CommandRoute extends Route {
 
   matches(interaction: Interaction): boolean {
     if (interaction.type !== 2) return false;
-    if (interaction.data?.name !== this.parentCommand.name) return false;
-    if (this.command instanceof SlashCommand) {
-      return true;
-    } else if (this.command instanceof SubcommandGroupOption) {
-      return interaction.data?.options?.[0].name === this.command.name;
-    } else {
-      const firstLevel = interaction.data.options?.[0];
-      return (
-        firstLevel.name === this.command.name ||
-        firstLevel?.options?.[0].name === this.command.name
-      );
+    let parent = (this.command as any)["_parent"];
+    const commandTree = [this.command];
+    while (parent != null) {
+      commandTree.push(parent);
+      parent = parent["_parent"];
     }
+    commandTree.reverse();
+    let data = interaction.data;
+    for (const command of commandTree) {
+      if (!data || command.name !== data.name) return false;
+      data = data.options?.[0];
+    }
+    return true;
   }
 
   async execute(interaction: Interaction): Promise<void> {
