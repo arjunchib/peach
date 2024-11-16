@@ -2,8 +2,13 @@
   "name": "peach",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "api": "bun run ./scripts/api/gen_schema.ts"
+  },
   "devDependencies": {
-    "@types/bun": "^1.1.8"
+    "@types/bun": "^1.1.8",
+    "openapi-types": "^12.1.3",
+    "prettier": "^3.3.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
