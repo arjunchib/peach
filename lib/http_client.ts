@@ -1,3 +1,4 @@
+import axios from "axios";
 import { APP_CONFIG } from "./bootstrap";
 import { inject } from "./injector";
 import { logger } from "./logger";
@@ -13,14 +14,23 @@ export class HttpClient {
     body?: any
   ): Promise<T> {
     logger.http(method, url, body);
-    const res = await fetch(`${this.baseUrl}${url}`, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bot ${this.config.token}`,
-      },
-      body: JSON.stringify(body),
-    });
+    const res =
+      body instanceof FormData
+        ? await fetch(`${this.baseUrl}${url}`, {
+            method,
+            headers: {
+              Authorization: `Bot ${this.config.token}`,
+            },
+            body,
+          })
+        : await fetch(`${this.baseUrl}${url}`, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bot ${this.config.token}`,
+            },
+            body: JSON.stringify(body),
+          });
     const resBody = (await res.json()) as any;
     if (res.status >= 400 && res.status < 600) {
       logger.http(

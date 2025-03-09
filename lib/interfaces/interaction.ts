@@ -1,3 +1,4 @@
+import type { Attachment } from "./attachment";
 import type { Embed } from "./embed";
 import type { Message } from "./message";
 import type { User } from "./user";
@@ -48,7 +49,7 @@ export interface MessageInteractionResponseData {
   allowed_mentions?: any;
   flags?: number;
   components?: any[];
-  attachments?: any[];
+  attachments?: Omit<Attachment, "size" | "url" | "proxy_url">[];
 }
 
 export interface AutocompleteInteractionResponseData {

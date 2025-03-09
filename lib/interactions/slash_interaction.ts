@@ -28,7 +28,8 @@ export class SlashInteraction<T> extends Interaction {
   }
 
   async respondWith(
-    response: string | MessageInteractionResponseData | Component[][]
+    response: string | MessageInteractionResponseData | Component[][],
+    attachments?: ConstructorParameters<typeof Blob>[0][]
   ) {
     if (typeof response === "string") {
       response = { content: response };
@@ -49,6 +50,27 @@ export class SlashInteraction<T> extends Interaction {
       // console.log(components);
       response.components = components;
     }
+    let body: any;
+    if (attachments && response.attachments) {
+      const formData = new FormData();
+      formData.append(
+        "payload_json",
+        JSON.stringify({ type: 4, data: response })
+      );
+      for (const attachment of response.attachments) {
+        const i = attachment.id;
+        formData.append(
+          `files[${i}]`,
+          new Blob(attachments[parseInt(i)], {
+            type: attachment.content_type,
+          }),
+          attachment.filename
+        );
+      }
+      body = formData;
+    } else {
+      body = { type: 4, data: response };
+    }
     if (this.webhookService) {
       const [resolve, reject] =
         this.webhookService.resolvers.get(this.id) ?? [];
@@ -64,7 +86,7 @@ export class SlashInteraction<T> extends Interaction {
       await this.discordRestService.createInteractionResponse(
         this.id,
         this.token,
-        { type: 4, data: response }
+        body
       );
     }
   }
