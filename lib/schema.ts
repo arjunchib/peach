@@ -2,13 +2,13 @@ import * as h from "./schema_helpers";
 
 export class DiscordRestService {
   async get_my_oauth2_application(): Promise<any> {
-    await fetch(h.createUrl("/oauth2/applications/@me", {}));
+    await h.fetchDiscord("get", "/oauth2/applications/@me", {});
   }
   async list_my_connections(): Promise<any> {
-    await fetch(h.createUrl("/users/@me/connections", {}));
+    await h.fetchDiscord("get", "/users/@me/connections", {});
   }
   async create_dm(): Promise<any> {
-    await fetch(h.createUrl("/users/@me/channels", {}));
+    await h.fetchDiscord("post", "/users/@me/channels", {});
   }
   async list_my_guilds(params: {
     before?: SnowflakeType;
@@ -16,75 +16,71 @@ export class DiscordRestService {
     limit?: number;
     with_counts?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl("/users/@me/guilds", {
-        before: params.before,
-        after: params.after,
-        limit: params.limit,
-        with_counts: params.with_counts,
-      }),
-    );
+    await h.fetchDiscord("get", "/users/@me/guilds", {
+      before: params.before,
+      after: params.after,
+      limit: params.limit,
+      with_counts: params.with_counts,
+    });
   }
   async get_my_application(): Promise<any> {
-    await fetch(h.createUrl("/applications/@me", {}));
+    await h.fetchDiscord("get", "/applications/@me", {});
   }
   async update_my_application(): Promise<any> {
-    await fetch(h.createUrl("/applications/@me", {}));
+    await h.fetchDiscord("patch", "/applications/@me", {});
   }
   async get_bot_gateway(): Promise<any> {
-    await fetch(h.createUrl("/gateway/bot", {}));
+    await h.fetchDiscord("get", "/gateway/bot", {});
   }
   async get_public_keys(): Promise<any> {
-    await fetch(h.createUrl("/oauth2/keys", {}));
+    await h.fetchDiscord("get", "/oauth2/keys", {});
   }
   async get_my_oauth2_authorization(): Promise<any> {
-    await fetch(h.createUrl("/oauth2/@me", {}));
+    await h.fetchDiscord("get", "/oauth2/@me", {});
   }
   async list_voice_regions(): Promise<any> {
-    await fetch(h.createUrl("/voice/regions", {}));
+    await h.fetchDiscord("get", "/voice/regions", {});
   }
   async get_my_user(): Promise<any> {
-    await fetch(h.createUrl("/users/@me", {}));
+    await h.fetchDiscord("get", "/users/@me", {});
   }
   async update_my_user(): Promise<any> {
-    await fetch(h.createUrl("/users/@me", {}));
+    await h.fetchDiscord("patch", "/users/@me", {});
   }
   async get_soundboard_default_sounds(): Promise<any> {
-    await fetch(h.createUrl("/soundboard-default-sounds", {}));
+    await h.fetchDiscord("get", "/soundboard-default-sounds", {});
   }
   async create_stage_instance(): Promise<any> {
-    await fetch(h.createUrl("/stage-instances", {}));
+    await h.fetchDiscord("post", "/stage-instances", {});
   }
   async list_sticker_packs(): Promise<any> {
-    await fetch(h.createUrl("/sticker-packs", {}));
+    await h.fetchDiscord("get", "/sticker-packs", {});
   }
   async get_gateway(): Promise<any> {
-    await fetch(h.createUrl("/gateway", {}));
+    await h.fetchDiscord("get", "/gateway", {});
   }
   async create_guild(): Promise<any> {
-    await fetch(h.createUrl("/guilds", {}));
+    await h.fetchDiscord("post", "/guilds", {});
   }
   async list_my_private_archived_threads(params: {
     channel_id: SnowflakeType;
     before?: SnowflakeType;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/users/@me/threads/archived/private`,
-        { before: params.before, limit: params.limit },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/users/@me/threads/archived/private`,
+      { before: params.before, limit: params.limit },
     );
   }
   async list_guild_application_command_permissions(params: {
     application_id: SnowflakeType;
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/permissions`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/permissions`,
+      {},
     );
   }
   async get_guild_application_command_permissions(params: {
@@ -92,11 +88,10 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     command_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}/permissions`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}/permissions`,
+      {},
     );
   }
   async set_guild_application_command_permissions(params: {
@@ -107,11 +102,10 @@ export class DiscordRestService {
       permissions?: ApplicationCommandPermission[];
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}/permissions`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}/permissions`,
+      {},
     );
   }
   async delete_my_message_reaction(params: {
@@ -119,11 +113,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     emoji_name: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/@me`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/@me`,
+      {},
     );
   }
   async add_my_message_reaction(params: {
@@ -131,11 +124,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     emoji_name: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/@me`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/@me`,
+      {},
     );
   }
   async list_private_archived_threads(params: {
@@ -143,11 +135,10 @@ export class DiscordRestService {
     before?: string;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/threads/archived/private`, {
-        before: params.before,
-        limit: params.limit,
-      }),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/threads/archived/private`,
+      { before: params.before, limit: params.limit },
     );
   }
   async list_public_archived_threads(params: {
@@ -155,31 +146,28 @@ export class DiscordRestService {
     before?: string;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/threads/archived/public`, {
-        before: params.before,
-        limit: params.limit,
-      }),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/threads/archived/public`,
+      { before: params.before, limit: params.limit },
     );
   }
   async delete_application_user_role_connection(params: {
     application_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/users/@me/applications/${params.application_id}/role-connection`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/users/@me/applications/${params.application_id}/role-connection`,
+      {},
     );
   }
   async get_application_user_role_connection(params: {
     application_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/users/@me/applications/${params.application_id}/role-connection`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/users/@me/applications/${params.application_id}/role-connection`,
+      {},
     );
   }
   async update_application_user_role_connection(params: {
@@ -192,46 +180,46 @@ export class DiscordRestService {
       };
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/users/@me/applications/${params.application_id}/role-connection`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/users/@me/applications/${params.application_id}/role-connection`,
+      {},
     );
   }
   async get_my_guild_member(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/users/@me/guilds/${params.guild_id}/member`, {}));
+    await h.fetchDiscord(
+      "get",
+      `/users/@me/guilds/${params.guild_id}/member`,
+      {},
+    );
   }
   async get_application_role_connections_metadata(params: {
     application_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/role-connections/metadata`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/role-connections/metadata`,
+      {},
     );
   }
   async update_application_role_connections_metadata(params: {
     application_id: SnowflakeType;
     body: ApplicationRoleConnectionsMetadataItemRequest[] | null;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/role-connections/metadata`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/applications/${params.application_id}/role-connections/metadata`,
+      {},
     );
   }
   async consume_entitlement(params: {
     application_id: SnowflakeType;
     entitlement_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/entitlements/${params.entitlement_id}/consume`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/entitlements/${params.entitlement_id}/consume`,
+      {},
     );
   }
   async delete_guild_application_command(params: {
@@ -239,11 +227,10 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     command_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async get_guild_application_command(params: {
@@ -251,11 +238,10 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     command_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async update_guild_application_command(params: {
@@ -264,11 +250,10 @@ export class DiscordRestService {
     command_id: SnowflakeType;
     body: ApplicationCommandPatchRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async list_guild_application_commands(params: {
@@ -276,11 +261,10 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     with_localizations?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
-        { with_localizations: params.with_localizations },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
+      { with_localizations: params.with_localizations },
     );
   }
   async create_guild_application_command(params: {
@@ -288,11 +272,10 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     body: ApplicationCommandCreateRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
+      {},
     );
   }
   async bulk_set_guild_application_commands(params: {
@@ -300,21 +283,24 @@ export class DiscordRestService {
     guild_id: SnowflakeType;
     body: ApplicationCommandUpdateRequest[] | null;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/applications/${params.application_id}/guilds/${params.guild_id}/commands`,
+      {},
     );
   }
   async leave_thread(params: { channel_id: SnowflakeType }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/thread-members/@me`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/thread-members/@me`,
+      {},
     );
   }
   async join_thread(params: { channel_id: SnowflakeType }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/thread-members/@me`, {}),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/thread-members/@me`,
+      {},
     );
   }
   async bulk_delete_messages(params: {
@@ -323,8 +309,10 @@ export class DiscordRestService {
       messages: SnowflakeType[];
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/messages/bulk-delete`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/messages/bulk-delete`,
+      {},
     );
   }
   async delete_user_message_reaction(params: {
@@ -333,11 +321,10 @@ export class DiscordRestService {
     emoji_name: string;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}/${params.user_id}`,
+      {},
     );
   }
   async delete_all_message_reactions_by_emoji(params: {
@@ -345,11 +332,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     emoji_name: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}`,
+      {},
     );
   }
   async list_message_reactions_by_emoji(params: {
@@ -360,33 +346,30 @@ export class DiscordRestService {
     limit?: number;
     type?: ReactionTypes;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}`,
-        { after: params.after, limit: params.limit, type: params.type },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions/${params.emoji_name}`,
+      { after: params.after, limit: params.limit, type: params.type },
     );
   }
   async delete_all_message_reactions(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/reactions`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/messages/${params.message_id}/reactions`,
+      {},
     );
   }
   async crosspost_message(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/crosspost`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/messages/${params.message_id}/crosspost`,
+      {},
     );
   }
   async create_thread_from_message(params: {
@@ -394,11 +377,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     body: CreateTextThreadWithMessageRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}/threads`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/messages/${params.message_id}/threads`,
+      {},
     );
   }
   async get_answer_voters(params: {
@@ -408,22 +390,20 @@ export class DiscordRestService {
     after?: SnowflakeType;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/polls/${params.message_id}/answers/${params.answer_id}`,
-        { after: params.after, limit: params.limit },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/polls/${params.message_id}/answers/${params.answer_id}`,
+      { after: params.after, limit: params.limit },
     );
   }
   async poll_expire(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/polls/${params.message_id}/expire`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/polls/${params.message_id}/expire`,
+      {},
     );
   }
   async delete_original_webhook_message(params: {
@@ -431,11 +411,10 @@ export class DiscordRestService {
     webhook_token: string;
     thread_id?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
+      { thread_id: params.thread_id },
     );
   }
   async get_original_webhook_message(params: {
@@ -443,11 +422,10 @@ export class DiscordRestService {
     webhook_token: string;
     thread_id?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
+      { thread_id: params.thread_id },
     );
   }
   async update_original_webhook_message(params: {
@@ -456,11 +434,10 @@ export class DiscordRestService {
     thread_id?: SnowflakeType;
     body: IncomingWebhookUpdateRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/@original`,
+      { thread_id: params.thread_id },
     );
   }
   async list_guild_scheduled_event_users(params: {
@@ -471,38 +448,35 @@ export class DiscordRestService {
     before?: SnowflakeType;
     after?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}/users`,
-        {
-          with_member: params.with_member,
-          limit: params.limit,
-          before: params.before,
-          after: params.after,
-        },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}/users`,
+      {
+        with_member: params.with_member,
+        limit: params.limit,
+        before: params.before,
+        after: params.after,
+      },
     );
   }
   async delete_auto_moderation_rule(params: {
     guild_id: SnowflakeType;
     rule_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
+      {},
     );
   }
   async get_auto_moderation_rule(params: {
     guild_id: SnowflakeType;
     rule_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
+      {},
     );
   }
   async update_auto_moderation_rule(params: {
@@ -514,18 +488,19 @@ export class DiscordRestService {
       | MLSpamUpsertRequestPartial
       | MentionSpamUpsertRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/auto-moderation/rules/${params.rule_id}`,
+      {},
     );
   }
   async list_auto_moderation_rules(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/auto-moderation/rules`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/auto-moderation/rules`,
+      {},
     );
   }
   async create_auto_moderation_rule(params: {
@@ -536,14 +511,20 @@ export class DiscordRestService {
       | MLSpamUpsertRequest
       | MentionSpamUpsertRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/auto-moderation/rules`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/guilds/${params.guild_id}/auto-moderation/rules`,
+      {},
     );
   }
   async get_self_voice_state(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/voice-states/@me`, {}));
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/voice-states/@me`,
+      {},
+    );
   }
   async update_self_voice_state(params: {
     guild_id: SnowflakeType;
@@ -553,24 +534,30 @@ export class DiscordRestService {
       channel_id?: SnowflakeType;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/voice-states/@me`, {}));
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/voice-states/@me`,
+      {},
+    );
   }
   async search_guild_members(params: {
     guild_id: SnowflakeType;
     limit: number;
     query: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members/search`, {
-        limit: params.limit,
-        query: params.query,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/members/search`, {
+      limit: params.limit,
+      query: params.query,
+    });
   }
   async get_active_guild_threads(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/threads/active`, {}));
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/threads/active`,
+      {},
+    );
   }
   async update_my_guild_member(params: {
     guild_id: SnowflakeType;
@@ -578,18 +565,17 @@ export class DiscordRestService {
       nick?: string;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/members/@me`, {}));
+    await h.fetchDiscord("patch", `/guilds/${params.guild_id}/members/@me`, {});
   }
   async delete_guild_member_role(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
     role_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/members/${params.user_id}/roles/${params.role_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/members/${params.user_id}/roles/${params.role_id}`,
+      {},
     );
   }
   async add_guild_member_role(params: {
@@ -597,47 +583,43 @@ export class DiscordRestService {
     user_id: SnowflakeType;
     role_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/members/${params.user_id}/roles/${params.role_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/guilds/${params.guild_id}/members/${params.user_id}/roles/${params.role_id}`,
+      {},
     );
   }
   async leave_guild(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/users/@me/guilds/${params.guild_id}`, {}));
+    await h.fetchDiscord("delete", `/users/@me/guilds/${params.guild_id}`, {});
   }
   async applications_get_activity_instance(params: {
     application_id: SnowflakeType;
     instance_id: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/activity-instances/${params.instance_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/activity-instances/${params.instance_id}`,
+      {},
     );
   }
   async delete_entitlement(params: {
     application_id: SnowflakeType;
     entitlement_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/entitlements/${params.entitlement_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/applications/${params.application_id}/entitlements/${params.entitlement_id}`,
+      {},
     );
   }
   async get_entitlement(params: {
     application_id: SnowflakeType;
     entitlement_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/entitlements/${params.entitlement_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/entitlements/${params.entitlement_id}`,
+      {},
     );
   }
   async get_entitlements(params: {
@@ -651,8 +633,10 @@ export class DiscordRestService {
     exclude_ended?: boolean;
     only_active?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/entitlements`, {
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/entitlements`,
+      {
         user_id: params.user_id,
         sku_ids: params.sku_ids,
         guild_id: params.guild_id,
@@ -661,45 +645,47 @@ export class DiscordRestService {
         limit: params.limit,
         exclude_ended: params.exclude_ended,
         only_active: params.only_active,
-      }),
+      },
     );
   }
   async create_entitlement(params: {
     application_id: SnowflakeType;
     body: CreateEntitlementRequestData;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/entitlements`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/entitlements`,
+      {},
     );
   }
   async upload_application_attachment(params: {
     application_id: SnowflakeType;
     body: any;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/attachment`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/attachment`,
+      {},
     );
   }
   async delete_application_command(params: {
     application_id: SnowflakeType;
     command_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/applications/${params.application_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async get_application_command(params: {
     application_id: SnowflakeType;
     command_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async update_application_command(params: {
@@ -707,59 +693,60 @@ export class DiscordRestService {
     command_id: SnowflakeType;
     body: ApplicationCommandPatchRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/commands/${params.command_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/applications/${params.application_id}/commands/${params.command_id}`,
+      {},
     );
   }
   async list_application_commands(params: {
     application_id: SnowflakeType;
     with_localizations?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/commands`, {
-        with_localizations: params.with_localizations,
-      }),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/commands`,
+      { with_localizations: params.with_localizations },
     );
   }
   async create_application_command(params: {
     application_id: SnowflakeType;
     body: ApplicationCommandCreateRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/commands`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/commands`,
+      {},
     );
   }
   async bulk_set_application_commands(params: {
     application_id: SnowflakeType;
     body: ApplicationCommandUpdateRequest[] | null;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/commands`, {}),
+    await h.fetchDiscord(
+      "put",
+      `/applications/${params.application_id}/commands`,
+      {},
     );
   }
   async delete_application_emoji(params: {
     application_id: SnowflakeType;
     emoji_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/emojis/${params.emoji_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/applications/${params.application_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async get_application_emoji(params: {
     application_id: SnowflakeType;
     emoji_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/emojis/${params.emoji_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async update_application_emoji(params: {
@@ -769,18 +756,19 @@ export class DiscordRestService {
       name?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/applications/${params.application_id}/emojis/${params.emoji_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/applications/${params.application_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async list_application_emojis(params: {
     application_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/emojis`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/applications/${params.application_id}/emojis`,
+      {},
     );
   }
   async create_application_emoji(params: {
@@ -790,8 +778,10 @@ export class DiscordRestService {
       image: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/applications/${params.application_id}/emojis`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/applications/${params.application_id}/emojis`,
+      {},
     );
   }
   async create_interaction_response(params: {
@@ -806,30 +796,30 @@ export class DiscordRestService {
       | PongInteractionCallbackRequest
       | UpdateMessageInteractionCallbackRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/interactions/${params.interaction_id}/${params.interaction_token}/callback`,
-        { with_response: params.with_response },
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/interactions/${params.interaction_id}/${params.interaction_token}/callback`,
+      { with_response: params.with_response },
     );
   }
   async send_soundboard_sound(params: {
     channel_id: SnowflakeType;
     body: SoundboardSoundSendRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/send-soundboard-sound`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/send-soundboard-sound`,
+      {},
     );
   }
   async delete_thread_member(params: {
     channel_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/thread-members/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/thread-members/${params.user_id}`,
+      {},
     );
   }
   async get_thread_member(params: {
@@ -837,22 +827,20 @@ export class DiscordRestService {
     user_id: SnowflakeType;
     with_member?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/thread-members/${params.user_id}`,
-        { with_member: params.with_member },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/thread-members/${params.user_id}`,
+      { with_member: params.with_member },
     );
   }
   async add_thread_member(params: {
     channel_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/thread-members/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/thread-members/${params.user_id}`,
+      {},
     );
   }
   async list_thread_members(params: {
@@ -861,23 +849,24 @@ export class DiscordRestService {
     limit?: number;
     after?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/thread-members`, {
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/thread-members`,
+      {
         with_member: params.with_member,
         limit: params.limit,
         after: params.after,
-      }),
+      },
     );
   }
   async delete_channel_permission_overwrite(params: {
     channel_id: SnowflakeType;
     overwrite_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/permissions/${params.overwrite_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/permissions/${params.overwrite_id}`,
+      {},
     );
   }
   async set_channel_permission_overwrite(params: {
@@ -889,22 +878,20 @@ export class DiscordRestService {
       deny?: number;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/permissions/${params.overwrite_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/permissions/${params.overwrite_id}`,
+      {},
     );
   }
   async delete_group_dm_user(params: {
     channel_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/recipients/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/recipients/${params.user_id}`,
+      {},
     );
   }
   async add_group_dm_user(params: {
@@ -915,11 +902,10 @@ export class DiscordRestService {
       nick?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/recipients/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/recipients/${params.user_id}`,
+      {},
     );
   }
   async follow_channel(params: {
@@ -928,28 +914,30 @@ export class DiscordRestService {
       webhook_channel_id: SnowflakeType;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/followers`, {}));
+    await h.fetchDiscord(
+      "post",
+      `/channels/${params.channel_id}/followers`,
+      {},
+    );
   }
   async delete_message(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/messages/${params.message_id}`,
+      {},
     );
   }
   async get_message(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/channels/${params.channel_id}/messages/${params.message_id}`,
+      {},
     );
   }
   async update_message(params: {
@@ -957,11 +945,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     body: MessageEditRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/messages/${params.message_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/channels/${params.channel_id}/messages/${params.message_id}`,
+      {},
     );
   }
   async list_messages(params: {
@@ -971,25 +958,23 @@ export class DiscordRestService {
     after?: SnowflakeType;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/channels/${params.channel_id}/messages`, {
-        around: params.around,
-        before: params.before,
-        after: params.after,
-        limit: params.limit,
-      }),
-    );
+    await h.fetchDiscord("get", `/channels/${params.channel_id}/messages`, {
+      around: params.around,
+      before: params.before,
+      after: params.after,
+      limit: params.limit,
+    });
   }
   async create_message(params: {
     channel_id: SnowflakeType;
     body: MessageCreateRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/messages`, {}));
+    await h.fetchDiscord("post", `/channels/${params.channel_id}/messages`, {});
   }
   async list_channel_webhooks(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/webhooks`, {}));
+    await h.fetchDiscord("get", `/channels/${params.channel_id}/webhooks`, {});
   }
   async create_webhook(params: {
     channel_id: SnowflakeType;
@@ -998,56 +983,54 @@ export class DiscordRestService {
       avatar?: string;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/webhooks`, {}));
+    await h.fetchDiscord("post", `/channels/${params.channel_id}/webhooks`, {});
   }
   async list_channel_invites(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/invites`, {}));
+    await h.fetchDiscord("get", `/channels/${params.channel_id}/invites`, {});
   }
   async create_channel_invite(params: {
     channel_id: SnowflakeType;
     body: CreateGroupDMInviteRequest | CreateGuildInviteRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/invites`, {}));
+    await h.fetchDiscord("post", `/channels/${params.channel_id}/invites`, {});
   }
   async create_thread(params: {
     channel_id: SnowflakeType;
     body: CreateForumThreadRequest | CreateTextThreadWithoutMessageRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/threads`, {}));
+    await h.fetchDiscord("post", `/channels/${params.channel_id}/threads`, {});
   }
   async trigger_typing_indicator(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/typing`, {}));
+    await h.fetchDiscord("post", `/channels/${params.channel_id}/typing`, {});
   }
   async unpin_message(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/pins/${params.message_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/channels/${params.channel_id}/pins/${params.message_id}`,
+      {},
     );
   }
   async pin_message(params: {
     channel_id: SnowflakeType;
     message_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/channels/${params.channel_id}/pins/${params.message_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "put",
+      `/channels/${params.channel_id}/pins/${params.message_id}`,
+      {},
     );
   }
   async list_pinned_messages(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}/pins`, {}));
+    await h.fetchDiscord("get", `/channels/${params.channel_id}/pins`, {});
   }
   async delete_webhook_message(params: {
     webhook_id: SnowflakeType;
@@ -1055,11 +1038,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     thread_id?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
+      { thread_id: params.thread_id },
     );
   }
   async get_webhook_message(params: {
@@ -1068,11 +1050,10 @@ export class DiscordRestService {
     message_id: SnowflakeType;
     thread_id?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
+      { thread_id: params.thread_id },
     );
   }
   async update_webhook_message(params: {
@@ -1082,11 +1063,10 @@ export class DiscordRestService {
     thread_id?: SnowflakeType;
     body: IncomingWebhookUpdateRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
-        { thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/messages/${params.message_id}`,
+      { thread_id: params.thread_id },
     );
   }
   async execute_github_compatible_webhook(params: {
@@ -1096,11 +1076,10 @@ export class DiscordRestService {
     thread_id?: SnowflakeType;
     body: GithubWebhook;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/github`,
-        { wait: params.wait, thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/github`,
+      { wait: params.wait, thread_id: params.thread_id },
     );
   }
   async execute_slack_compatible_webhook(params: {
@@ -1110,15 +1089,14 @@ export class DiscordRestService {
     thread_id?: SnowflakeType;
     body: SlackWebhook;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/webhooks/${params.webhook_id}/${params.webhook_token}/slack`,
-        { wait: params.wait, thread_id: params.thread_id },
-      ),
+    await h.fetchDiscord(
+      "post",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}/slack`,
+      { wait: params.wait, thread_id: params.thread_id },
     );
   }
   async get_guild_template(params: { code: string }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/templates/${params.code}`, {}));
+    await h.fetchDiscord("get", `/guilds/templates/${params.code}`, {});
   }
   async create_guild_from_template(params: {
     code: string;
@@ -1127,35 +1105,35 @@ export class DiscordRestService {
       icon?: string;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/templates/${params.code}`, {}));
+    await h.fetchDiscord("post", `/guilds/templates/${params.code}`, {});
   }
   async get_guild_new_member_welcome(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/new-member-welcome`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/new-member-welcome`,
+      {},
     );
   }
   async delete_guild_soundboard_sound(params: {
     guild_id: SnowflakeType;
     sound_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
+      {},
     );
   }
   async get_guild_soundboard_sound(params: {
     guild_id: SnowflakeType;
     sound_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
+      {},
     );
   }
   async update_guild_soundboard_sound(params: {
@@ -1163,37 +1141,39 @@ export class DiscordRestService {
     sound_id: SnowflakeType;
     body: SoundboardPatchRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/soundboard-sounds/${params.sound_id}`,
+      {},
     );
   }
   async list_guild_soundboard_sounds(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/soundboard-sounds`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/soundboard-sounds`,
+      {},
     );
   }
   async create_guild_soundboard_sound(params: {
     guild_id: SnowflakeType;
     body: SoundboardCreateRequest;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/soundboard-sounds`, {}),
+    await h.fetchDiscord(
+      "post",
+      `/guilds/${params.guild_id}/soundboard-sounds`,
+      {},
     );
   }
   async delete_guild_scheduled_event(params: {
     guild_id: SnowflakeType;
     guild_scheduled_event_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
+      {},
     );
   }
   async get_guild_scheduled_event(params: {
@@ -1201,11 +1181,10 @@ export class DiscordRestService {
     guild_scheduled_event_id: SnowflakeType;
     with_user_count?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
-        { with_user_count: params.with_user_count },
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
+      { with_user_count: params.with_user_count },
     );
   }
   async update_guild_scheduled_event(params: {
@@ -1216,22 +1195,19 @@ export class DiscordRestService {
       | StageScheduledEventPatchRequestPartial
       | VoiceScheduledEventPatchRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/scheduled-events/${params.guild_scheduled_event_id}`,
+      {},
     );
   }
   async list_guild_scheduled_events(params: {
     guild_id: SnowflakeType;
     with_user_count?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/scheduled-events`, {
-        with_user_count: params.with_user_count,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/scheduled-events`, {
+      with_user_count: params.with_user_count,
+    });
   }
   async create_guild_scheduled_event(params: {
     guild_id: SnowflakeType;
@@ -1240,28 +1216,39 @@ export class DiscordRestService {
       | StageScheduledEventCreateRequest
       | VoiceScheduledEventCreateRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/scheduled-events`, {}));
+    await h.fetchDiscord(
+      "post",
+      `/guilds/${params.guild_id}/scheduled-events`,
+      {},
+    );
   }
   async get_guild_welcome_screen(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/welcome-screen`, {}));
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/welcome-screen`,
+      {},
+    );
   }
   async update_guild_welcome_screen(params: {
     guild_id: SnowflakeType;
     body: WelcomeScreenPatchRequestPartial;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/welcome-screen`, {}));
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/welcome-screen`,
+      {},
+    );
   }
   async get_voice_state(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/voice-states/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/voice-states/${params.user_id}`,
+      {},
     );
   }
   async update_voice_state(params: {
@@ -1272,47 +1259,45 @@ export class DiscordRestService {
       channel_id?: SnowflakeType;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/voice-states/${params.user_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/voice-states/${params.user_id}`,
+      {},
     );
   }
   async delete_guild_integration(params: {
     guild_id: SnowflakeType;
     integration_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/integrations/${params.integration_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/integrations/${params.integration_id}`,
+      {},
     );
   }
   async list_guild_integrations(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/integrations`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/integrations`, {});
   }
   async get_guild_widget(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/widget.json`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/widget.json`, {});
   }
   async get_guilds_onboarding(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/onboarding`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/onboarding`, {});
   }
   async put_guilds_onboarding(params: {
     guild_id: SnowflakeType;
     body: UpdateGuildOnboardingRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/onboarding`, {}));
+    await h.fetchDiscord("put", `/guilds/${params.guild_id}/onboarding`, {});
   }
   async get_guild_vanity_url(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/vanity-url`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/vanity-url`, {});
   }
   async list_guild_audit_log_entries(params: {
     guild_id: SnowflakeType;
@@ -1323,33 +1308,31 @@ export class DiscordRestService {
     after?: SnowflakeType;
     limit?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/audit-logs`, {
-        user_id: params.user_id,
-        target_id: params.target_id,
-        action_type: params.action_type,
-        before: params.before,
-        after: params.after,
-        limit: params.limit,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/audit-logs`, {
+      user_id: params.user_id,
+      target_id: params.target_id,
+      action_type: params.action_type,
+      before: params.before,
+      after: params.after,
+      limit: params.limit,
+    });
   }
   async get_guild_widget_png(params: {
     guild_id: SnowflakeType;
     style?: WidgetImageStyles;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/widget.png`, {
-        style: params.style,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/widget.png`, {
+      style: params.style,
+    });
   }
   async delete_guild_template(params: {
     guild_id: SnowflakeType;
     code: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/templates/${params.code}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/templates/${params.code}`,
+      {},
     );
   }
   async update_guild_template(params: {
@@ -1360,22 +1343,26 @@ export class DiscordRestService {
       description?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/templates/${params.code}`, {}),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/templates/${params.code}`,
+      {},
     );
   }
   async sync_guild_template(params: {
     guild_id: SnowflakeType;
     code: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/templates/${params.code}`, {}),
+    await h.fetchDiscord(
+      "put",
+      `/guilds/${params.guild_id}/templates/${params.code}`,
+      {},
     );
   }
   async list_guild_templates(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/templates`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/templates`, {});
   }
   async create_guild_template(params: {
     guild_id: SnowflakeType;
@@ -1384,28 +1371,26 @@ export class DiscordRestService {
       description?: string;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/templates`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/templates`, {});
   }
   async delete_guild_sticker(params: {
     guild_id: SnowflakeType;
     sticker_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
+      {},
     );
   }
   async get_guild_sticker(params: {
     guild_id: SnowflakeType;
     sticker_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
+      {},
     );
   }
   async update_guild_sticker(params: {
@@ -1417,11 +1402,10 @@ export class DiscordRestService {
       description?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(
-        `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
-        {},
-      ),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/stickers/${params.sticker_id}`,
+      {},
     );
   }
   async bulk_ban_users_from_guild(params: {
@@ -1431,22 +1415,22 @@ export class DiscordRestService {
       delete_message_seconds?: number;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/bulk-ban`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/bulk-ban`, {});
   }
   async list_guild_stickers(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/stickers`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/stickers`, {});
   }
   async create_guild_sticker(params: {
     guild_id: SnowflakeType;
     body: any;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/stickers`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/stickers`, {});
   }
   async get_guild_webhooks(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/webhooks`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/webhooks`, {});
   }
   async list_guild_channels(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/channels`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/channels`, {});
   }
   async bulk_update_guild_channels(params: {
     guild_id: SnowflakeType;
@@ -1457,28 +1441,32 @@ export class DiscordRestService {
       lock_permissions?: boolean;
     }[];
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/channels`, {}));
+    await h.fetchDiscord("patch", `/guilds/${params.guild_id}/channels`, {});
   }
   async create_guild_channel(params: {
     guild_id: SnowflakeType;
     body: CreateGuildChannelRequest;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/channels`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/channels`, {});
   }
   async delete_guild_member(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/members/${params.user_id}`,
+      {},
     );
   }
   async get_guild_member(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/members/${params.user_id}`,
+      {},
     );
   }
   async update_guild_member(params: {
@@ -1494,8 +1482,10 @@ export class DiscordRestService {
       flags?: number;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/members/${params.user_id}`,
+      {},
     );
   }
   async add_guild_member(params: {
@@ -1510,8 +1500,10 @@ export class DiscordRestService {
       flags?: number;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "put",
+      `/guilds/${params.guild_id}/members/${params.user_id}`,
+      {},
     );
   }
   async list_guild_members(params: {
@@ -1519,38 +1511,40 @@ export class DiscordRestService {
     limit?: number;
     after?: number;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/members`, {
-        limit: params.limit,
-        after: params.after,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/members`, {
+      limit: params.limit,
+      after: params.after,
+    });
   }
   async get_guild_preview(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/preview`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/preview`, {});
   }
   async list_guild_invites(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/invites`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/invites`, {});
   }
   async list_guild_voice_regions(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/regions`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/regions`, {});
   }
   async delete_guild_emoji(params: {
     guild_id: SnowflakeType;
     emoji_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/emojis/${params.emoji_id}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async get_guild_emoji(params: {
     guild_id: SnowflakeType;
     emoji_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/emojis/${params.emoji_id}`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async update_guild_emoji(params: {
@@ -1561,12 +1555,14 @@ export class DiscordRestService {
       roles?: (null | SnowflakeType)[];
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/emojis/${params.emoji_id}`, {}),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/emojis/${params.emoji_id}`,
+      {},
     );
   }
   async list_guild_emojis(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/emojis`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/emojis`, {});
   }
   async create_guild_emoji(params: {
     guild_id: SnowflakeType;
@@ -1576,12 +1572,12 @@ export class DiscordRestService {
       roles?: (null | SnowflakeType)[];
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/emojis`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/emojis`, {});
   }
   async get_guild_widget_settings(params: {
     guild_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/widget`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/widget`, {});
   }
   async update_guild_widget_settings(params: {
     guild_id: SnowflakeType;
@@ -1590,22 +1586,26 @@ export class DiscordRestService {
       enabled?: boolean;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/widget`, {}));
+    await h.fetchDiscord("patch", `/guilds/${params.guild_id}/widget`, {});
   }
   async delete_guild_role(params: {
     guild_id: SnowflakeType;
     role_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/roles/${params.role_id}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/roles/${params.role_id}`,
+      {},
     );
   }
   async get_guild_role(params: {
     guild_id: SnowflakeType;
     role_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/roles/${params.role_id}`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/roles/${params.role_id}`,
+      {},
     );
   }
   async update_guild_role(params: {
@@ -1621,12 +1621,14 @@ export class DiscordRestService {
       unicode_emoji?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/roles/${params.role_id}`, {}),
+    await h.fetchDiscord(
+      "patch",
+      `/guilds/${params.guild_id}/roles/${params.role_id}`,
+      {},
     );
   }
   async list_guild_roles(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/roles`, {}));
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/roles`, {});
   }
   async bulk_update_guild_roles(params: {
     guild_id: SnowflakeType;
@@ -1635,7 +1637,7 @@ export class DiscordRestService {
       position?: number;
     }[];
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/roles`, {}));
+    await h.fetchDiscord("patch", `/guilds/${params.guild_id}/roles`, {});
   }
   async create_guild_role(params: {
     guild_id: SnowflakeType;
@@ -1649,19 +1651,17 @@ export class DiscordRestService {
       unicode_emoji?: string;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/roles`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/roles`, {});
   }
   async preview_prune_guild(params: {
     guild_id: SnowflakeType;
     days?: number;
     include_roles?: string | (null | SnowflakeType)[];
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/prune`, {
-        days: params.days,
-        include_roles: params.include_roles,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/prune`, {
+      days: params.days,
+      include_roles: params.include_roles,
+    });
   }
   async prune_guild(params: {
     guild_id: SnowflakeType;
@@ -1671,22 +1671,26 @@ export class DiscordRestService {
       include_roles?: string | (null | SnowflakeType)[];
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/prune`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/prune`, {});
   }
   async unban_user_from_guild(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/bans/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/guilds/${params.guild_id}/bans/${params.user_id}`,
+      {},
     );
   }
   async get_guild_ban(params: {
     guild_id: SnowflakeType;
     user_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/bans/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/guilds/${params.guild_id}/bans/${params.user_id}`,
+      {},
     );
   }
   async ban_user_from_guild(params: {
@@ -1697,8 +1701,10 @@ export class DiscordRestService {
       delete_message_days?: number;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/bans/${params.user_id}`, {}),
+    await h.fetchDiscord(
+      "put",
+      `/guilds/${params.guild_id}/bans/${params.user_id}`,
+      {},
     );
   }
   async list_guild_bans(params: {
@@ -1707,13 +1713,11 @@ export class DiscordRestService {
     before?: SnowflakeType;
     after?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}/bans`, {
-        limit: params.limit,
-        before: params.before,
-        after: params.after,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}/bans`, {
+      limit: params.limit,
+      before: params.before,
+      after: params.after,
+    });
   }
   async set_guild_mfa_level(params: {
     guild_id: SnowflakeType;
@@ -1721,17 +1725,17 @@ export class DiscordRestService {
       level: GuildMFALevel;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}/mfa`, {}));
+    await h.fetchDiscord("post", `/guilds/${params.guild_id}/mfa`, {});
   }
   async delete_stage_instance(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/stage-instances/${params.channel_id}`, {}));
+    await h.fetchDiscord("delete", `/stage-instances/${params.channel_id}`, {});
   }
   async get_stage_instance(params: {
     channel_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/stage-instances/${params.channel_id}`, {}));
+    await h.fetchDiscord("get", `/stage-instances/${params.channel_id}`, {});
   }
   async update_stage_instance(params: {
     channel_id: SnowflakeType;
@@ -1740,36 +1744,40 @@ export class DiscordRestService {
       privacy_level?: StageInstancesPrivacyLevels;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/stage-instances/${params.channel_id}`, {}));
+    await h.fetchDiscord("patch", `/stage-instances/${params.channel_id}`, {});
   }
   async get_sticker_pack(params: { pack_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/sticker-packs/${params.pack_id}`, {}));
+    await h.fetchDiscord("get", `/sticker-packs/${params.pack_id}`, {});
   }
   async get_application(params: {
     application_id: SnowflakeType;
   }): Promise<any> {
-    await fetch(h.createUrl(`/applications/${params.application_id}`, {}));
+    await h.fetchDiscord("get", `/applications/${params.application_id}`, {});
   }
   async update_application(params: {
     application_id: SnowflakeType;
     body: ApplicationFormPartial;
   }): Promise<any> {
-    await fetch(h.createUrl(`/applications/${params.application_id}`, {}));
+    await h.fetchDiscord("patch", `/applications/${params.application_id}`, {});
   }
   async delete_webhook_by_token(params: {
     webhook_id: SnowflakeType;
     webhook_token: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/webhooks/${params.webhook_id}/${params.webhook_token}`, {}),
+    await h.fetchDiscord(
+      "delete",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}`,
+      {},
     );
   }
   async get_webhook_by_token(params: {
     webhook_id: SnowflakeType;
     webhook_token: string;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/webhooks/${params.webhook_id}/${params.webhook_token}`, {}),
+    await h.fetchDiscord(
+      "get",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}`,
+      {},
     );
   }
   async update_webhook_by_token(params: {
@@ -1780,8 +1788,10 @@ export class DiscordRestService {
       avatar?: string;
     };
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/webhooks/${params.webhook_id}/${params.webhook_token}`, {}),
+    await h.fetchDiscord(
+      "patch",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}`,
+      {},
     );
   }
   async execute_webhook(params: {
@@ -1791,21 +1801,20 @@ export class DiscordRestService {
     thread_id?: SnowflakeType;
     body: IncomingWebhookRequestPartial | IncomingWebhookUpdateRequestPartial;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/webhooks/${params.webhook_id}/${params.webhook_token}`, {
-        wait: params.wait,
-        thread_id: params.thread_id,
-      }),
+    await h.fetchDiscord(
+      "post",
+      `/webhooks/${params.webhook_id}/${params.webhook_token}`,
+      { wait: params.wait, thread_id: params.thread_id },
     );
   }
   async get_sticker(params: { sticker_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/stickers/${params.sticker_id}`, {}));
+    await h.fetchDiscord("get", `/stickers/${params.sticker_id}`, {});
   }
   async delete_webhook(params: { webhook_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/webhooks/${params.webhook_id}`, {}));
+    await h.fetchDiscord("delete", `/webhooks/${params.webhook_id}`, {});
   }
   async get_webhook(params: { webhook_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/webhooks/${params.webhook_id}`, {}));
+    await h.fetchDiscord("get", `/webhooks/${params.webhook_id}`, {});
   }
   async update_webhook(params: {
     webhook_id: SnowflakeType;
@@ -1815,13 +1824,13 @@ export class DiscordRestService {
       channel_id?: SnowflakeType;
     };
   }): Promise<any> {
-    await fetch(h.createUrl(`/webhooks/${params.webhook_id}`, {}));
+    await h.fetchDiscord("patch", `/webhooks/${params.webhook_id}`, {});
   }
   async delete_channel(params: { channel_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}`, {}));
+    await h.fetchDiscord("delete", `/channels/${params.channel_id}`, {});
   }
   async get_channel(params: { channel_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}`, {}));
+    await h.fetchDiscord("get", `/channels/${params.channel_id}`, {});
   }
   async update_channel(params: {
     channel_id: SnowflakeType;
@@ -1830,44 +1839,40 @@ export class DiscordRestService {
       | UpdateGuildChannelRequestPartial
       | UpdateThreadRequestPartial;
   }): Promise<any> {
-    await fetch(h.createUrl(`/channels/${params.channel_id}`, {}));
+    await h.fetchDiscord("patch", `/channels/${params.channel_id}`, {});
   }
   async invite_revoke(params: { code: string }): Promise<any> {
-    await fetch(h.createUrl(`/invites/${params.code}`, {}));
+    await h.fetchDiscord("delete", `/invites/${params.code}`, {});
   }
   async invite_resolve(params: {
     code: string;
     with_counts?: boolean;
     guild_scheduled_event_id?: SnowflakeType;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/invites/${params.code}`, {
-        with_counts: params.with_counts,
-        guild_scheduled_event_id: params.guild_scheduled_event_id,
-      }),
-    );
+    await h.fetchDiscord("get", `/invites/${params.code}`, {
+      with_counts: params.with_counts,
+      guild_scheduled_event_id: params.guild_scheduled_event_id,
+    });
   }
   async delete_guild(params: { guild_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}`, {}));
+    await h.fetchDiscord("delete", `/guilds/${params.guild_id}`, {});
   }
   async get_guild(params: {
     guild_id: SnowflakeType;
     with_counts?: boolean;
   }): Promise<any> {
-    await fetch(
-      h.createUrl(`/guilds/${params.guild_id}`, {
-        with_counts: params.with_counts,
-      }),
-    );
+    await h.fetchDiscord("get", `/guilds/${params.guild_id}`, {
+      with_counts: params.with_counts,
+    });
   }
   async update_guild(params: {
     guild_id: SnowflakeType;
     body: GuildPatchRequestPartial;
   }): Promise<any> {
-    await fetch(h.createUrl(`/guilds/${params.guild_id}`, {}));
+    await h.fetchDiscord("patch", `/guilds/${params.guild_id}`, {});
   }
   async get_user(params: { user_id: SnowflakeType }): Promise<any> {
-    await fetch(h.createUrl(`/users/${params.user_id}`, {}));
+    await h.fetchDiscord("get", `/users/${params.user_id}`, {});
   }
 }
 

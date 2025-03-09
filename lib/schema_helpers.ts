@@ -2,7 +2,7 @@ const BASE_URL = "";
 
 export function createUrl(
   path: string,
-  searchParams: Record<string, string | number | boolean | undefined>
+  searchParams: Record<string, string | number | boolean | undefined> = {}
 ) {
   const url = new URL(path, BASE_URL);
   const params: Record<string, string> = {};
@@ -14,3 +14,11 @@ export function createUrl(
   url.search = new URLSearchParams(params).toString();
   return url.href;
 }
+
+export async function fetchDiscord(
+  method: string,
+  path: string,
+  searchParams: Record<string, string | number | boolean | undefined>,
+  contentType?: string,
+  body?: any
+) {}

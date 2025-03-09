@@ -15,7 +15,7 @@ export class SchemaGenerator {
     // if (name !== "ApplicationCommandUpdateRequest")
     //   return ts.factory.createTypeReferenceNode("any");
     if (name === "Int53Type") return null;
-    console.log(name, obj);
+    // console.log(name, obj);
     this.name = name;
     this.schemas = schemas;
     if (

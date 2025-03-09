@@ -7,52 +7,72 @@ import { SchemaGenerator } from "./schema_generator";
 export class PathGenerator {
   private schemaGenerator = inject(SchemaGenerator);
 
-  generate(path: string, pathItem: openapi.PathItemObject) {
-    const pathItemParams =
-      pathItem.parameters?.map((param) => this.genParameter(param)) || [];
-    return [
-      pathItem.delete,
-      pathItem.get,
-      pathItem.head,
-      pathItem.options,
-      pathItem.patch,
-      pathItem.post,
-      pathItem.put,
-    ]
-      .map((operation) => {
-        if (!operation || !operation.operationId) return;
-        operation.requestBody;
-        const parameters = [
-          ...(pathItem.parameters || []),
-          ...(operation.parameters || []),
-        ];
-        const paramDeclaration = ts.factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          "params",
-          undefined,
-          ts.factory.createTypeLiteralNode(
-            [
-              ...parameters?.map((p) => this.genParameter(p)),
-              operation.requestBody
-                ? this.genParameter(operation.requestBody)
-                : undefined,
-            ].filter((p) => !!p)
-          )
-        );
-        const body = this.genBody(path, pathItem, operation, parameters);
-        return ts.factory.createMethodDeclaration(
-          ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Async),
-          undefined,
-          operation.operationId,
-          undefined,
-          undefined,
-          parameters.length > 0 ? [paramDeclaration] : [],
-          createReference("Promise<any>"),
-          ts.factory.createBlock([body])
-        );
-      })
-      .filter((obj) => !!obj);
+  private path!: string;
+  private pathItem!: openapi.PathItemObject;
+
+  generate(
+    path: string,
+    pathItem: openapi.PathItemObject
+  ): ts.MethodDeclaration[] {
+    this.path = path;
+    this.pathItem = pathItem;
+    const methods = [];
+    if (pathItem.delete) {
+      methods.push(this.genOperation("delete", pathItem.delete));
+    }
+    if (pathItem.get) {
+      methods.push(this.genOperation("get", pathItem.get));
+    }
+    if (pathItem.head) {
+      methods.push(this.genOperation("head", pathItem.head));
+    }
+    if (pathItem.options) {
+      methods.push(this.genOperation("options", pathItem.options));
+    }
+    if (pathItem.patch) {
+      methods.push(this.genOperation("patch", pathItem.patch));
+    }
+    if (pathItem.post) {
+      methods.push(this.genOperation("post", pathItem.post));
+    }
+    if (pathItem.put) {
+      methods.push(this.genOperation("put", pathItem.put));
+    }
+    return methods.filter((obj) => !!obj);
+  }
+
+  private genOperation(method: string, operation: openapi.OperationObject) {
+    if (!operation || !operation.operationId) return;
+    operation.requestBody;
+    const parameters = [
+      ...(this.pathItem.parameters || []),
+      ...(operation.parameters || []),
+    ];
+    const paramDeclaration = ts.factory.createParameterDeclaration(
+      undefined,
+      undefined,
+      "params",
+      undefined,
+      ts.factory.createTypeLiteralNode(
+        [
+          ...parameters?.map((p) => this.genParameter(p)),
+          operation.requestBody
+            ? this.genParameter(operation.requestBody)
+            : undefined,
+        ].filter((p) => !!p)
+      )
+    );
+    const body = this.genBody(method, operation, parameters);
+    return ts.factory.createMethodDeclaration(
+      ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Async),
+      undefined,
+      operation.operationId,
+      undefined,
+      undefined,
+      parameters.length > 0 ? [paramDeclaration] : [],
+      createReference("Promise<any>"),
+      ts.factory.createBlock([body])
+    );
   }
 
   private genUrl(url: string) {
@@ -83,8 +103,7 @@ export class PathGenerator {
   }
 
   private genBody(
-    path: string,
-    pathItem: openapi.PathItemObject,
+    method: string,
     operation: openapi.OperationObject,
     params: (openapi.ParameterObject | openapi.ReferenceObject)[]
   ) {
@@ -100,17 +119,17 @@ export class PathGenerator {
         })
         .filter((p) => !!p)
     );
-    const url = ts.factory.createCallExpression(
-      ts.factory.createIdentifier("h.createUrl"),
-      undefined,
-      [this.genUrl(path), queryParams]
-    );
     return ts.factory.createExpressionStatement(
       ts.factory.createAwaitExpression(
         ts.factory.createCallExpression(
-          ts.factory.createIdentifier("fetch"),
+          ts.factory.createIdentifier("h.fetchDiscord"),
           undefined,
-          [url]
+          [
+            ts.factory.createStringLiteral(method),
+            this.genUrl(this.path),
+            queryParams,
+            ts.factory.createStringLiteral(operation.requestBody),
+          ]
         )
       )
     );
