@@ -15,9 +15,8 @@ export interface VoiceState {
 }
 
 export type EncryptionMode =
-  | "xsalsa20_poly1305"
-  | "xsalsa20_poly1305_suffix"
-  | "xsalsa20_poly1305_lite";
+  | "aead_aes256_gcm_rtpsize"
+  | "aead_xchacha20_poly1305_rtpsize";
 
 export interface VoiceIdentifyEvent {
   op: 0;

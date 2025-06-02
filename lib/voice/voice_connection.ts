@@ -20,12 +20,17 @@ import type {
 } from "../interfaces/voice";
 import { GatewayService } from "../services/gateway_service";
 import { logger } from "../logger";
-import { secretbox, randomBytes } from "tweetnacl";
 import { WebmOpusDemuxer } from "./webm-opus-demuxer";
+import { xchacha20poly1305 } from "@noble/ciphers/chacha.js";
+import { gcm } from "@noble/ciphers/aes.js";
 
 const CHANNELS = 2;
 const TIMESTAMP_INC = (48_000 / 100) * CHANNELS;
 const MAX_NONCE_SIZE = 2 ** 32 - 1;
+const PREFERRED_MODES: EncryptionMode[] = [
+  "aead_aes256_gcm_rtpsize",
+  "aead_xchacha20_poly1305_rtpsize",
+];
 
 function randomNBit(numberOfBits: number) {
   return Math.floor(Math.random() * 2 ** numberOfBits);
@@ -179,36 +184,33 @@ export class VoiceConnection {
   }
 
   private encryptOpusPacket(opusPacket: Uint8Array, rtpHeader?: Uint8Array) {
-    if (!this.secretKey) {
-      throw new Error("No secret key");
-    }
-    if (this.encryptionMode === "xsalsa20_poly1305_lite") {
+    if (!this.secretKey) throw new Error("No secret key");
+    if (!rtpHeader) throw new Error("No RTP header");
+    if (this.encryptionMode === "aead_xchacha20_poly1305_rtpsize") {
       this.nonce++;
       if (this.nonce > MAX_NONCE_SIZE) this.nonce = 0;
       const nonceBuffer = new Uint8Array(24);
       const nonceView = new DataView(nonceBuffer.buffer);
       nonceView.setUint32(0, this.nonce);
+      const chacha = xchacha20poly1305(this.secretKey, nonceBuffer, rtpHeader);
       return new Uint8Array([
-        ...secretbox(opusPacket, nonceBuffer, this.secretKey),
-        ...nonceBuffer.slice(0, 4),
+        ...chacha.encrypt(opusPacket),
+        ...nonceBuffer.slice(0, 4), // nonce padding
       ]);
-    } else if (this.encryptionMode === "xsalsa20_poly1305_suffix") {
-      const random = randomBytes(24);
+    } else if (this.encryptionMode === "aead_aes256_gcm_rtpsize") {
+      this.nonce++;
+      if (this.nonce > MAX_NONCE_SIZE) this.nonce = 0;
+      const nonceBuffer = new Uint8Array(12);
+      const nonceView = new DataView(nonceBuffer.buffer);
+      nonceView.setUint32(0, this.nonce);
+      const aes = gcm(this.secretKey, nonceBuffer, rtpHeader);
       return new Uint8Array([
-        ...secretbox(opusPacket, random, this.secretKey),
-        ...random,
+        ...aes.encrypt(opusPacket),
+        ...nonceBuffer.slice(0, 4), // nonce padding
       ]);
+    } else {
+      throw new Error("Encryption mode not implemented");
     }
-
-    if (!rtpHeader) {
-      throw new Error("No RTP header");
-    }
-
-    return secretbox(
-      opusPacket,
-      new Uint8Array([...rtpHeader, ...new Uint8Array(12)]),
-      this.secretKey
-    );
   }
 
   private send<T extends VoiceGatewayEvent>(event: T) {
@@ -361,8 +363,16 @@ export class VoiceConnection {
   }
 
   private selectProtocol() {
+    console.log(
+      "select proto",
+      this.myIp,
+      this.udp?.port,
+      !this.myIp,
+      !this.udp?.port
+    );
     if (!this.myIp) throw new Error("No IP address");
     if (!this.udp?.port) throw new Error("No UDP Port");
+
     this.send<VoiceSelectProtocolEvent>({
       op: 1,
       d: {
@@ -377,13 +387,14 @@ export class VoiceConnection {
   }
 
   private preferredEncryptionMode(): EncryptionMode {
-    if (this.availableModes?.includes("xsalsa20_poly1305_lite")) {
-      return "xsalsa20_poly1305_lite";
-    } else if (this.availableModes?.includes("xsalsa20_poly1305_suffix")) {
-      return "xsalsa20_poly1305_suffix";
-    } else {
+    const preferredMode = PREFERRED_MODES.find((mode) =>
+      this.availableModes?.includes(mode)
+    );
+    if (!preferredMode) {
+      console.error("No supported modes available!");
       throw new Error("No supported modes available!");
     }
+    return preferredMode;
   }
 
   private resumeConnection() {
