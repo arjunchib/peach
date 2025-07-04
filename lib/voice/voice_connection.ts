@@ -237,6 +237,7 @@ export class VoiceConnection {
 
   private connect() {
     if (
+      !this.ws &&
       this.sessionId &&
       this.token &&
       this.guildId &&
@@ -287,6 +288,7 @@ export class VoiceConnection {
     logger.voice(`Websocket disconnected ${code}`);
     if (this.userDisconnected || (code >= 4000 && code < 5000)) {
       clearInterval(this.heartbeatTimer);
+      this.ws = undefined;
       logger.voice(`Voice connection closed`);
     } else {
       this.resumeConnection();
