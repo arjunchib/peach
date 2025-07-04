@@ -220,6 +220,7 @@ export class VoiceConnection {
 
   private onVoiceStateUpdate(event: VoiceStateUpdateRecvEvent) {
     if (event.d.guild_id !== this.guildId) return;
+    if (event.d.user_id !== Bun.env.APPLICATION_ID) return;
     if (event.d.channel_id) {
       this.sessionId = event.d.session_id;
       this.connect();
